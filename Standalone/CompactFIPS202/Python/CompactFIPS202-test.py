@@ -48,12 +48,16 @@ for instance in instances:
 
         #Parse the document line by line (works only for Short and Long files)
         for line in referenceFile:
-            if line.startswith('Len'):
-                Len=int(line.split(' = ')[1].strip('\n\r'))
+            #if line.startswith('Len'):
+                #Len=int(line.split(' = ')[1].strip('\n\r'))
             if line.startswith('Msg'):
                 Msg=line.split(' = ')[1].strip('\n\r')
+                Len = len(Msg)
+                if (Len % 2) != 0 :
+                    Msg = '0'+Msg
+                    Len = Len+1    
                 msg = bytearray(binascii.unhexlify(Msg))
-                msg = msg[:Len//8]
+                #msg = msg[:Len//8]
             if (line.startswith('MD') or line.startswith('Squeezed')):
                 MD_ref=line.split(' = ')[1].strip('\n\r')
                 reference = bytearray(binascii.unhexlify(MD_ref))
@@ -65,6 +69,7 @@ for instance in instances:
                     exit()
 
                 if ((Len % 8) == 0):
+                    
                     # Perform our own computation
                     computed = CompactFIPS202.Keccak(r, c, msg, delimitedSuffix, n//8)
                     #Compare the results
