@@ -18,6 +18,8 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #define _Xoodoo_times4_SnP_h_
 
 #include <stdint.h>
+#include "align.h"
+#include "PlSnP-common.h"
 
 /** For the documentation, see PlSnP-documentation.h. */
 
@@ -27,7 +29,8 @@ typedef struct {
 
 typedef Xoodootimes4_SIMD128_states Xoodootimes4_states;
 
-#define Xoodootimes4_implementation        "Optimized ARM Cortex-A7(/A8/A9) NEON assembler implementation"
+#define Xoodootimes4_GetImplementation()            "Optimized ARM Cortex-A7(/A8/A9) NEON assembler implementation"
+#define Xoodootimes4_GetFeatures()           (PlSnP_Feature_Main | PlSnP_Feature_Farfalle)
 
 #define Xoodootimes4_StaticInitialize()
 void Xoodootimes4_InitializeAll(Xoodootimes4_SIMD128_states *states);
@@ -46,7 +49,6 @@ void Xoodootimes4_ExtractLanesAll(const Xoodootimes4_SIMD128_states *states, uns
 void Xoodootimes4_ExtractAndAddBytes(const Xoodootimes4_SIMD128_states *states, unsigned int instanceIndex,  const unsigned char *input, unsigned char *output, unsigned int offset, unsigned int length);
 void Xoodootimes4_ExtractAndAddLanesAll(const Xoodootimes4_SIMD128_states *states, const unsigned char *input, unsigned char *output, unsigned int laneCount, unsigned int laneOffset);
 
-#define Xoodootimes4_FastXoofff_supported
 void Xooffftimes4_AddIs(unsigned char *output, const unsigned char *input, size_t bitLen);
 size_t Xooffftimes4_CompressFastLoop(unsigned char *k, unsigned char *x, const unsigned char *input, size_t length);
 size_t Xooffftimes4_ExpandFastLoop(unsigned char *yAccu, const unsigned char *kRoll, unsigned char *output, size_t length);

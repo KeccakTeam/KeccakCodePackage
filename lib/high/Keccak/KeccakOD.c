@@ -50,6 +50,7 @@ static unsigned int OD_Concat( unsigned int E, unsigned int bt )
 }
 
 #ifdef XKCP_has_KeccakP1600
+    #define SnP_GetFeatures                 KeccakP1600_GetFeatures
     #define SnP_StaticInitialize            KeccakP1600_StaticInitialize
     #define SnP_Initialize                  KeccakP1600_Initialize
     #define SnP_AddByte                     KeccakP1600_AddByte

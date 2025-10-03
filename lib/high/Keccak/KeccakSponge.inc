@@ -24,6 +24,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #define SpongeAbsorbLastFewBits         JOIN(prefix, _SpongeAbsorbLastFewBits)
 #define SpongeSqueeze                   JOIN(prefix, _SpongeSqueeze)
 
+#define SnP_GetFeatures                 JOIN(SnP, _GetFeatures)
 #define SnP_StaticInitialize            JOIN(SnP, _StaticInitialize)
 #define SnP_Initialize                  JOIN(SnP, _Initialize)
 #define SnP_AddByte                     JOIN(SnP, _AddByte)
@@ -50,15 +51,14 @@ int Sponge(unsigned int rate, unsigned int capacity, const unsigned char *input,
     SnP_Initialize(&state);
 
     /* First, absorb whole blocks */
-#ifdef SnP_FastLoop_Absorb
-    if (((rateInBytes % (SnP_width/200)) == 0) && (inputByteLen >= rateInBytes)) {
+    if ((SnP_GetFeatures() & SnP_Feature_SpongeAbsorb)
+            && ((rateInBytes % (SnP_width/200)) == 0) && (inputByteLen >= rateInBytes)) {
         /* fast lane: whole lane rate */
         size_t j;
         j = SnP_FastLoop_Absorb(&state, rateInBytes/(SnP_width/200), curInput, inputByteLen);
         curInput += j;
         inputByteLen -= j;
     }
-#endif
     while(inputByteLen >= (size_t)rateInBytes) {
         #ifdef KeccakReference
         displayBytes(1, "Block to be absorbed", curInput, rateInBytes);
@@ -160,16 +160,14 @@ int SpongeAbsorb(SpongeInstance *instance, const unsigned char *data, size_t dat
     curData = data;
     while(i < dataByteLen) {
         if ((instance->byteIOIndex == 0) && (dataByteLen-i >= rateInBytes)) {
-#ifdef SnP_FastLoop_Absorb
             /* processing full blocks first */
-            if ((rateInBytes % (SnP_width/200)) == 0) {
+            if ((SnP_GetFeatures() & SnP_Feature_SpongeAbsorb) && ((rateInBytes % (SnP_width/200)) == 0)) {
                 /* fast lane: whole lane rate */
                 j = SnP_FastLoop_Absorb(&instance->state, rateInBytes/(SnP_width/200), curData, dataByteLen - i);
                 i += j;
                 curData += j;
             }
             else {
-#endif
                 for(j=dataByteLen-i; j>=rateInBytes; j-=rateInBytes) {
                     #ifdef KeccakReference
                     displayBytes(1, "Block to be absorbed", curData, rateInBytes);
@@ -179,9 +177,7 @@ int SpongeAbsorb(SpongeInstance *instance, const unsigned char *data, size_t dat
                     curData+=rateInBytes;
                 }
                 i = dataByteLen - j;
-#ifdef SnP_FastLoop_Absorb
             }
-#endif
         }
         else {
             /* normal lane: using the message queue */
@@ -305,6 +301,7 @@ int SpongeSqueeze(SpongeInstance *instance, unsigned char *data, size_t dataByte
 #undef SpongeAbsorb
 #undef SpongeAbsorbLastFewBits
 #undef SpongeSqueeze
+#undef SnP_GetFeatures
 #undef SnP_StaticInitialize
 #undef SnP_Initialize
 #undef SnP_AddByte

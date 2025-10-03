@@ -23,26 +23,51 @@ http://creativecommons.org/publicdomain/zero/1.0/
   *  - KeccakP1600times2 for Keccak-p[1600]×2 (i.e., two states of 1600 bits each)
   *  - KeccakP1600times4 for Keccak-p[1600]×4
   *  - KeccakP1600times8 for Keccak-p[1600]×8 (i.e., eight states of 1600 bits each)
+  * - Xoodootimes4 for Xoodoo×4 (i.e., four states of 384 bits each)
+  * - Xoodootimes8 for Xoodoo×8
+  * - Xoodootimes16 for Xoodoo×16 (i.e., sixteen states of 384 bits each)
   * Functions can be replaced by macros, when appropriate.
   *
   * An implementation must provide each function (or macro) as listed below,
   * instantiated with the suitable prefix. In addition, the implementation
   * must come with a header "KeccakP-1600-times{2,4,8}-SnP.h"
-  * to define the following symbols (with PlSnP replaced by the appropriate prefix):
-  *     - PlSnP_implementation: a synopsis of the implementation;
-  *     - PlSnP_statesSizeInBytes: the number of bytes to store the states;
-  *     - PlSnP_statesAlignment: the number of bytes of which the states' address
-  *         must be a multiple of.
+  * or "Xoodoo-times{4, 8, 16}-SnP.h"
+  * that will be included by the users of the corresponding permutation.
+  */
+
+/** Administrative functions
+ */
+
+/** Function that returns a description of the implementation.
+ */
+const char * PlSnP_GetImplementation();
+
+/** Function that returns the set of features that are implemented for this permutation.
+ * The return value is a bit mask that can be the sum of the following values
+ * defined in "PlSnP-common.h" (here the PlSnP prefix is to be taken litterally):
+ *   - PlSnP_Feature_Main
+ *   - PlSnP_Feature_SpongeAbsorb
+ *   - PlSnP_Feature_Farfalle
+ *   - PlSnP_Feature_KangarooTwelve
+ *
+ * Each of these features corresponds to a set of functions as detailed below.
+ */
+int PlSnP_GetFeatures();
+
+
+/** Main functions
   *
-  * An implementation may also instantiate the function PlSnP_FastLoop_Absorb(),
-  * in which case the header must define the symbol PlSnP_FastLoop_supported.
+  * The following functions are the main PlSnP functions.
+  * If supported, the PlSnP_Feature_Main flag must be present in PlSnP_GetFeatures().
   *
   * For Keccak-p[1600]:
   *     - PlSnP_PermuteAll() is instantiated as
-  *         - KeccakP1600_PermuteAll_12rounds() for Keccak-p[1600, 12] and
-  *         - KeccakP1600_PermuteAll_24rounds() for Keccak-f[1600]=Keccak-p[1600, 24].
-  *     - PlSnP_FastLoop_Absorb() can be instantiated as
-  *         KeccakF1600times{2,4,8}_FastLoop_Absorb() for Keccak-f[1600].
+  *         - KeccakP1600times{2,4,8}_PermuteAll_12rounds() for Keccak-p[1600, 12] and
+  *         - KeccakP1600times{2,4,8}_PermuteAll_24rounds() for Keccak-f[1600]=Keccak-p[1600, 24].
+  * For Xoodoo:
+  *     - PlSnP_PermuteAll() is instantiated as
+  *         - Xoodootimes{4,8,16}_PermuteAll_6rounds() for Xoodoo[6] and
+  *         - Xoodootimes{4,8,16}_PermuteAll_12rounds() for Xoodoo[12].
   */
 
 /** Function called at least once before any use of the other PlSnP_*
@@ -223,6 +248,20 @@ void PlSnP_ExtractAndAddBytes(const void *states, unsigned int instanceIndex, co
   */
 void PlSnP_ExtractAndAddLanesAll(const void *states, const unsigned char *input, unsigned char *output, unsigned int laneCount, unsigned int laneOffset);
 
+
+/** Sponge absorb functions
+  *
+  * An implementation may also instantiate the function PlSnP_FastLoop_Absorb(),
+  * in which case the bit PlSnP_Feature_SpongeAbsorb must be active in PlSnP_GetFeatures().
+  *
+  * For Keccak-p[1600]:
+  *     - PlSnP_PermuteAll() is instantiated as
+  *         - KeccakP1600_PermuteAll_12rounds() for Keccak-p[1600, 12] and
+  *         - KeccakP1600_PermuteAll_24rounds() for Keccak-f[1600]=Keccak-p[1600, 24].
+  *     - PlSnP_FastLoop_Absorb() can be instantiated as
+  *         KeccakF1600times{2,4,8}_FastLoop_Absorb() for Keccak-f[1600].
+  */
+
 /** Function that has the same behavior as repeatedly calling
   *  - PlSnP_AddLanesAll() with P blocks of @a laneCount lanes from @a data and with offset @a laneOffsetParallel;
   *  - PlSnP_PermuteAll() on the states @a states;
@@ -241,3 +280,76 @@ void PlSnP_ExtractAndAddLanesAll(const void *states, const unsigned char *input,
   * @pre    0 < @a laneCount < SnP_laneCount
   */
 size_t PlSnP_FastLoop_Absorb(void *states, unsigned int laneCount, unsigned int laneOffsetParallel, unsigned int laneOffsetSerial, unsigned char *data, size_t dataByteLen);
+
+
+/** Farfalle functions
+  *
+  * An implementation may also instantiate functions that optimize the Farfalle construction,
+  * in which case the bit PlSnP_Feature_Farfalle must be active in PlSnP_GetFeatures().
+  *
+  * For Kravatte, this means the following functions:
+  *     - KeccakP1600times{2,4,8}_KravatteCompress
+  *     - KeccakP1600times{2,4,8}_KravatteExpand
+  * For Xoofff, this means the following functions:
+  *     - Xooffftimes{4,8,16}_AddIs
+  *     - Xooffftimes{4,8,16}_CompressFastLoop
+  *     - Xooffftimes{4,8,16}_ExpandFastLoop
+  *
+  * See https://tosc.iacr.org/index.php/ToSC/article/view/855 and https://tosc.iacr.org/index.php/ToSC/article/view/7359 for more details.
+  */
+
+/** Function to XOR an input buffer into an output buffer, with bit granularity.
+  * If the bit length is not a multipe of 8, the 8 - (@a bitLen mod 8) most significant
+  * bits of the output buffer are set to zero.
+  * @param  output      Pointer to the output buffer, containing ceil(@a bitLen / 8) bytes.
+  * @param  input       Pointer to the input buffer, containing ceil(@a bitLen / 8) bytes.
+  * @param  bitLen      Length in bits of the input and output buffers.
+  */
+void PlSnP_AddIs(unsigned char *output, const unsigned char *input, size_t bitLen);
+
+/** Function to absorb whole input blocks and add their contribution to the accumulator
+  * according to the Farfalle construction.
+  * For Kravatte, the block length is 200 bytes.
+  * For Xoofff, the block length is 48 bytes.
+  * @param  kRoll       Pointer to the buffer containing the rolling key, updated by this function.
+  * @param  xAccu       Pointer to the buffer containing the accumulator, updated by this function.
+  * @param  input       Pointer to the input buffer, containing @a length bytes.
+  * @param  length      The length of the input in bytes.
+  * @returns    The number of bytes absorbed.
+  * @pre  @a length must be at least one block.
+  */
+size_t PlSnP_CompressFastLoop(unsigned char *kRoll, unsigned char *xAccu, const unsigned char *input, size_t length);
+
+/** Function to squeeze whole input blocks and update the rolling accumulator
+  * according to the Farfalle construction.
+  * For Kravatte, the block length is 200 bytes.
+  * For Xoofff, the block length is 48 bytes.
+  * @param  yAccu       Pointer to the buffer containing the rolling accumulator, updated by this function.
+  * @param  kRoll       Pointer to the buffer containing the rolling key.
+  * @param  output      Pointer to the output buffer, containing @a length bytes.
+  * @param  length      The requested length in bytes.
+  * @returns    The number of bytes squeezed.
+  * @pre  @a length must be at least one block.
+  */
+size_t PlSnP_ExpandFastLoop(unsigned char *yAccu, const unsigned char *kRoll, unsigned char *output, size_t length);
+
+
+/** KangarooTwelve optimizing functions
+  *
+  * An implementation may also instantiate functions that optimize KT128 and KT256,
+  * in which case the bit PlSnP_Feature_KangarooTwelve must be active in PlSnP_GetFeatures().
+  */
+
+/** Function that processes N leaves of KT128 and outputs N chaining values,
+  * with N the number of permutations computed in parallel.
+  * @param  input       Pointer to the buffer containing N leaves, that is N*8192 bytes.
+  * @param  output      Pointer to the buffer to store the N chaining values, that is N*32 bytes.
+  */
+void PlSnP_KT128ProcessLeaves(const unsigned char *input, unsigned char *output);
+
+/** Function that processes N leaves of KT256 and outputs N chaining values,
+ * with N the number of permutations computed in parallel.
+ * @param  input       Pointer to the buffer containing N leaves, that is N*8192 bytes.
+ * @param  output      Pointer to the buffer to store the N chaining values, that is N*64 bytes.
+ */
+void PlSnP_KT256ProcessLeaves(const unsigned char *input, unsigned char *output);

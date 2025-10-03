@@ -23,15 +23,15 @@
 
 # -----------------------------------------------------------------------------
 #
-# void KeccakP1600_Initialize(void *state);
+# void KeccakP1600_AVX2_Initialize(void *state);
 #
-.globl  KeccakP1600_Initialize
-.globl _KeccakP1600_Initialize
+.globl  KeccakP1600_AVX2_Initialize
+.globl _KeccakP1600_AVX2_Initialize
 .ifndef old_gas_syntax
-.type   KeccakP1600_Initialize,@function
+.type   KeccakP1600_AVX2_Initialize,@function
 .endif
-KeccakP1600_Initialize:
-_KeccakP1600_Initialize:
+KeccakP1600_AVX2_Initialize:
+_KeccakP1600_AVX2_Initialize:
 .balign 32
     vpxor       %ymm0,%ymm0,%ymm0
     vmovdqu     %ymm0,0*32(%rdi)
@@ -43,21 +43,21 @@ _KeccakP1600_Initialize:
     movq        $0,6*32(%rdi)
     ret
 .ifndef old_gas_syntax
-.size   KeccakP1600_Initialize,.-KeccakP1600_Initialize
+.size   KeccakP1600_AVX2_Initialize,.-KeccakP1600_AVX2_Initialize
 .endif
 
 # -----------------------------------------------------------------------------
 #
-# void KeccakP1600_AddByte(void *state, unsigned char data, unsigned int offset);
+# void KeccakP1600_AVX2_AddByte(void *state, unsigned char data, unsigned int offset);
 #                                %rdi                 %rsi               %rdx
 #
-.globl  KeccakP1600_AddByte
-.globl _KeccakP1600_AddByte
+.globl  KeccakP1600_AVX2_AddByte
+.globl _KeccakP1600_AVX2_AddByte
 .ifndef old_gas_syntax
-.type   KeccakP1600_AddByte,@function
+.type   KeccakP1600_AVX2_AddByte,@function
 .endif
-KeccakP1600_AddByte:
-_KeccakP1600_AddByte:
+KeccakP1600_AVX2_AddByte:
+_KeccakP1600_AVX2_AddByte:
 .balign 32
     mov         %rdx, %rax
     and         $7, %rax
@@ -69,21 +69,21 @@ _KeccakP1600_AddByte:
     xorb        %sil, (%rdi)
     ret
 .ifndef old_gas_syntax
-.size   KeccakP1600_AddByte,.-KeccakP1600_AddByte
+.size   KeccakP1600_AVX2_AddByte,.-KeccakP1600_AVX2_AddByte
 .endif
 
 # -----------------------------------------------------------------------------
 #
-# void KeccakP1600_AddBytes(void *state, const unsigned char *data, unsigned int offset, unsigned int length);
+# void KeccakP1600_AVX2_AddBytes(void *state, const unsigned char *data, unsigned int offset, unsigned int length);
 #                                %rdi                         %rsi               %rdx                 %rcx
 #
-.globl  KeccakP1600_AddBytes
-.globl _KeccakP1600_AddBytes
+.globl  KeccakP1600_AVX2_AddBytes
+.globl _KeccakP1600_AVX2_AddBytes
 .ifndef old_gas_syntax
-.type   KeccakP1600_AddBytes,@function
+.type   KeccakP1600_AVX2_AddBytes,@function
 .endif
-KeccakP1600_AddBytes:
-_KeccakP1600_AddBytes:
+KeccakP1600_AVX2_AddBytes:
+_KeccakP1600_AVX2_AddBytes:
 .balign 32
     cmp         $0, %rcx
     jz          KeccakP1600_AddBytes_Exit
@@ -134,21 +134,21 @@ KeccakP1600_AddBytes_LastIncompleteLaneLoop:
 KeccakP1600_AddBytes_Exit:
     ret
 .ifndef old_gas_syntax
-.size   KeccakP1600_AddBytes,.-KeccakP1600_AddBytes
+.size   KeccakP1600_AVX2_AddBytes,.-KeccakP1600_AVX2_AddBytes
 .endif
 
 # -----------------------------------------------------------------------------
 #
-# void KeccakP1600_OverwriteBytes(void *state, const unsigned char *data, unsigned int offset, unsigned int length);
+# void KeccakP1600_AVX2_OverwriteBytes(void *state, const unsigned char *data, unsigned int offset, unsigned int length);
 #                                       %rdi                        %rsi               %rdx                 %rcx
 #
-.globl  KeccakP1600_OverwriteBytes
-.globl _KeccakP1600_OverwriteBytes
+.globl  KeccakP1600_AVX2_OverwriteBytes
+.globl _KeccakP1600_AVX2_OverwriteBytes
 .ifndef old_gas_syntax
-.type   KeccakP1600_OverwriteBytes,@function
+.type   KeccakP1600_AVX2_OverwriteBytes,@function
 .endif
-KeccakP1600_OverwriteBytes:
-_KeccakP1600_OverwriteBytes:
+KeccakP1600_AVX2_OverwriteBytes:
+_KeccakP1600_AVX2_OverwriteBytes:
 .balign 32
     cmp         $0, %rcx
     jz          KeccakP1600_OverwriteBytes_Exit
@@ -199,21 +199,21 @@ KeccakP1600_OverwriteBytes_LastIncompleteLaneLoop:
 KeccakP1600_OverwriteBytes_Exit:
     ret
 .ifndef old_gas_syntax
-.size   KeccakP1600_OverwriteBytes,.-KeccakP1600_OverwriteBytes
+.size   KeccakP1600_AVX2_OverwriteBytes,.-KeccakP1600_AVX2_OverwriteBytes
 .endif
 
 # -----------------------------------------------------------------------------
 #
-# void KeccakP1600_OverwriteWithZeroes(void *state, unsigned int byteCount);
+# void KeccakP1600_AVX2_OverwriteWithZeroes(void *state, unsigned int byteCount);
 #                                            %rdi                %rsi
 #
-.globl  KeccakP1600_OverwriteWithZeroes
-.globl _KeccakP1600_OverwriteWithZeroes
+.globl  KeccakP1600_AVX2_OverwriteWithZeroes
+.globl _KeccakP1600_AVX2_OverwriteWithZeroes
 .ifndef old_gas_syntax
-.type   KeccakP1600_OverwriteWithZeroes,@function
+.type   KeccakP1600_AVX2_OverwriteWithZeroes,@function
 .endif
-KeccakP1600_OverwriteWithZeroes:
-_KeccakP1600_OverwriteWithZeroes:
+KeccakP1600_AVX2_OverwriteWithZeroes:
+_KeccakP1600_AVX2_OverwriteWithZeroes:
 .balign 32
     cmp         $0, %rsi
     jz          KeccakP1600_OverwriteWithZeroes_Exit
@@ -240,21 +240,21 @@ KeccakP1600_OverwriteWithZeroes_LastIncompleteLaneLoop:
 KeccakP1600_OverwriteWithZeroes_Exit:
     ret
 .ifndef old_gas_syntax
-.size   KeccakP1600_OverwriteWithZeroes,.-KeccakP1600_OverwriteWithZeroes
+.size   KeccakP1600_AVX2_OverwriteWithZeroes,.-KeccakP1600_AVX2_OverwriteWithZeroes
 .endif
 
 # -----------------------------------------------------------------------------
 #
-# void KeccakP1600_ExtractBytes(const void *state, unsigned char *data, unsigned int offset, unsigned int length);
+# void KeccakP1600_AVX2_ExtractBytes(const void *state, unsigned char *data, unsigned int offset, unsigned int length);
 #                                           %rdi                  %rsi               %rdx                 %rcx
 #
-.globl  KeccakP1600_ExtractBytes
-.globl _KeccakP1600_ExtractBytes
+.globl  KeccakP1600_AVX2_ExtractBytes
+.globl _KeccakP1600_AVX2_ExtractBytes
 .ifndef old_gas_syntax
-.type   KeccakP1600_ExtractBytes,@function
+.type   KeccakP1600_AVX2_ExtractBytes,@function
 .endif
-KeccakP1600_ExtractBytes:
-_KeccakP1600_ExtractBytes:
+KeccakP1600_AVX2_ExtractBytes:
+_KeccakP1600_AVX2_ExtractBytes:
 .balign 32
     push        %rbx
     cmp         $0, %rcx
@@ -308,21 +308,21 @@ KeccakP1600_ExtractBytes_Exit:
     pop         %rbx
     ret
 .ifndef old_gas_syntax
-.size   KeccakP1600_ExtractBytes,.-KeccakP1600_ExtractBytes
+.size   KeccakP1600_AVX2_ExtractBytes,.-KeccakP1600_AVX2_ExtractBytes
 .endif
 
 # -----------------------------------------------------------------------------
 #
-# void KeccakP1600_ExtractAndAddBytes(const void *state, const unsigned char *input, unsigned char *output, unsigned int offset, unsigned int length);
+# void KeccakP1600_AVX2_ExtractAndAddBytes(const void *state, const unsigned char *input, unsigned char *output, unsigned int offset, unsigned int length);
 #                                                 %rdi                        %rsi                  %rdx                 %rcx                  %r8
 #
-.globl  KeccakP1600_ExtractAndAddBytes
-.globl _KeccakP1600_ExtractAndAddBytes
+.globl  KeccakP1600_AVX2_ExtractAndAddBytes
+.globl _KeccakP1600_AVX2_ExtractAndAddBytes
 .ifndef old_gas_syntax
-.type   KeccakP1600_ExtractAndAddBytes,@function
+.type   KeccakP1600_AVX2_ExtractAndAddBytes,@function
 .endif
-KeccakP1600_ExtractAndAddBytes:
-_KeccakP1600_ExtractAndAddBytes:
+KeccakP1600_AVX2_ExtractAndAddBytes:
+_KeccakP1600_AVX2_ExtractAndAddBytes:
 .balign 32
     push        %rbx
     push        %r10
@@ -384,7 +384,7 @@ KeccakP1600_ExtractAndAddBytes_Exit:
     pop         %rbx
     ret
 .ifndef old_gas_syntax
-.size   KeccakP1600_ExtractAndAddBytes,.-KeccakP1600_ExtractAndAddBytes
+.size   KeccakP1600_AVX2_ExtractAndAddBytes,.-KeccakP1600_AVX2_ExtractAndAddBytes
 .endif
 
 # -----------------------------------------------------------------------------
@@ -539,16 +539,16 @@ __KeccakF1600:
 
 # -----------------------------------------------------------------------------
 #
-# void KeccakP1600_Permute_24rounds(void *state);
+# void KeccakP1600_AVX2_Permute_24rounds(void *state);
 #                                        %rdi
 #
-.globl  KeccakP1600_Permute_24rounds
-.globl _KeccakP1600_Permute_24rounds
+.globl  KeccakP1600_AVX2_Permute_24rounds
+.globl _KeccakP1600_AVX2_Permute_24rounds
 .ifndef old_gas_syntax
-.type   KeccakP1600_Permute_24rounds,@function
+.type   KeccakP1600_AVX2_Permute_24rounds,@function
 .endif
-KeccakP1600_Permute_24rounds:
-_KeccakP1600_Permute_24rounds:
+KeccakP1600_AVX2_Permute_24rounds:
+_KeccakP1600_AVX2_Permute_24rounds:
 .balign 32
     lea             rhotates_left+96(%rip),%r8
     lea             rhotates_right+96(%rip),%r9
@@ -574,21 +574,21 @@ _KeccakP1600_Permute_24rounds:
     vzeroupper
     ret
 .ifndef old_gas_syntax
-.size   KeccakP1600_Permute_24rounds,.-KeccakP1600_Permute_24rounds
+.size   KeccakP1600_AVX2_Permute_24rounds,.-KeccakP1600_AVX2_Permute_24rounds
 .endif
 
 # -----------------------------------------------------------------------------
 #
-# void KeccakP1600_Permute_12rounds(void *state);
+# void KeccakP1600_AVX2_Permute_12rounds(void *state);
 #                                        %rdi
 #
-.globl  KeccakP1600_Permute_12rounds
-.globl _KeccakP1600_Permute_12rounds
+.globl  KeccakP1600_AVX2_Permute_12rounds
+.globl _KeccakP1600_AVX2_Permute_12rounds
 .ifndef old_gas_syntax
-.type   KeccakP1600_Permute_12rounds,@function
+.type   KeccakP1600_AVX2_Permute_12rounds,@function
 .endif
-KeccakP1600_Permute_12rounds:
-_KeccakP1600_Permute_12rounds:
+KeccakP1600_AVX2_Permute_12rounds:
+_KeccakP1600_AVX2_Permute_12rounds:
 .balign 32
     lea             rhotates_left+96(%rip),%r8
     lea             rhotates_right+96(%rip),%r9
@@ -614,21 +614,21 @@ _KeccakP1600_Permute_12rounds:
     vzeroupper
     ret
 .ifndef old_gas_syntax
-.size   KeccakP1600_Permute_12rounds,.-KeccakP1600_Permute_12rounds
+.size   KeccakP1600_AVX2_Permute_12rounds,.-KeccakP1600_AVX2_Permute_12rounds
 .endif
 
 # -----------------------------------------------------------------------------
 #
-# void KeccakP1600_Permute_Nrounds(void *state, unsigned int nrounds);
+# void KeccakP1600_AVX2_Permute_Nrounds(void *state, unsigned int nrounds);
 #                                        %rdi                %rsi
 #
-.globl  KeccakP1600_Permute_Nrounds
-.globl _KeccakP1600_Permute_Nrounds
+.globl  KeccakP1600_AVX2_Permute_Nrounds
+.globl _KeccakP1600_AVX2_Permute_Nrounds
 .ifndef old_gas_syntax
-.type   KeccakP1600_Permute_Nrounds,@function
+.type   KeccakP1600_AVX2_Permute_Nrounds,@function
 .endif
-KeccakP1600_Permute_Nrounds:
-_KeccakP1600_Permute_Nrounds:
+KeccakP1600_AVX2_Permute_Nrounds:
+_KeccakP1600_AVX2_Permute_Nrounds:
 .balign 32
     lea             rhotates_left+96(%rip),%r8
     lea             rhotates_right+96(%rip),%r9
@@ -656,21 +656,21 @@ _KeccakP1600_Permute_Nrounds:
     vzeroupper
     ret
 .ifndef old_gas_syntax
-.size   KeccakP1600_Permute_Nrounds,.-KeccakP1600_Permute_Nrounds
+.size   KeccakP1600_AVX2_Permute_Nrounds,.-KeccakP1600_AVX2_Permute_Nrounds
 .endif
 
 # -----------------------------------------------------------------------------
 #
-# size_t KeccakF1600_FastLoop_Absorb(void *state, unsigned int laneCount, const unsigned char *data, size_t dataByteLen);
+# size_t KeccakF1600_AVX2_FastLoop_Absorb(void *state, unsigned int laneCount, const unsigned char *data, size_t dataByteLen);
 #                                          %rdi                %rsi                            %rdx         %rcx
 #
-.globl  KeccakF1600_FastLoop_Absorb
-.globl _KeccakF1600_FastLoop_Absorb
+.globl  KeccakF1600_AVX2_FastLoop_Absorb
+.globl _KeccakF1600_AVX2_FastLoop_Absorb
 .ifndef old_gas_syntax
-.type   KeccakF1600_FastLoop_Absorb,@function
+.type   KeccakF1600_AVX2_FastLoop_Absorb,@function
 .endif
-KeccakF1600_FastLoop_Absorb:
-_KeccakF1600_FastLoop_Absorb:
+KeccakF1600_AVX2_FastLoop_Absorb:
+_KeccakF1600_AVX2_FastLoop_Absorb:
 .balign 32
     push            %rbx
     push            %r10
@@ -823,9 +823,9 @@ KeccakF1600_FastLoop_Absorb_LanesAddLoop:
     push            %rdx
     push            %rcx
 .ifdef no_plt
-    call            KeccakP1600_Permute_24rounds
+    call            KeccakP1600_AVX2_Permute_24rounds
 .else
-    call            KeccakP1600_Permute_24rounds@PLT
+    call            KeccakP1600_AVX2_Permute_24rounds@PLT
 .endif
     pop             %rcx
     pop             %rdx
@@ -835,21 +835,21 @@ KeccakF1600_FastLoop_Absorb_LanesAddLoop:
     jae             KeccakF1600_FastLoop_Absorb_Not17Lanes
     jmp             KeccakF1600_FastLoop_Absorb_Exit
 .ifndef old_gas_syntax
-.size   KeccakF1600_FastLoop_Absorb,.-KeccakF1600_FastLoop_Absorb
+.size   KeccakF1600_AVX2_FastLoop_Absorb,.-KeccakF1600_AVX2_FastLoop_Absorb
 .endif
 
 # -----------------------------------------------------------------------------
 #
-# size_t KeccakP1600_12rounds_FastLoop_Absorb(void *state, unsigned int laneCount, const unsigned char *data, size_t dataByteLen);
+# size_t KeccakP1600_12rounds_AVX2_FastLoop_Absorb(void *state, unsigned int laneCount, const unsigned char *data, size_t dataByteLen);
 #                                          %rdi                %rsi                            %rdx         %rcx
 #
-.globl  KeccakP1600_12rounds_FastLoop_Absorb
-.globl _KeccakP1600_12rounds_FastLoop_Absorb
+.globl  KeccakP1600_12rounds_AVX2_FastLoop_Absorb
+.globl _KeccakP1600_12rounds_AVX2_FastLoop_Absorb
 .ifndef old_gas_syntax
-.type   KeccakP1600_12rounds_FastLoop_Absorb,@function
+.type   KeccakP1600_12rounds_AVX2_FastLoop_Absorb,@function
 .endif
-KeccakP1600_12rounds_FastLoop_Absorb:
-_KeccakP1600_12rounds_FastLoop_Absorb:
+KeccakP1600_12rounds_AVX2_FastLoop_Absorb:
+_KeccakP1600_12rounds_AVX2_FastLoop_Absorb:
 .balign 32
     push            %rbx
     push            %r10
@@ -1002,9 +1002,9 @@ KeccakP1600_12rounds_FastLoop_Absorb_LanesAddLoop:
     push            %rdx
     push            %rcx
 .ifdef no_plt
-    call            KeccakP1600_Permute_12rounds
+    call            KeccakP1600_AVX2_Permute_12rounds
 .else
-    call            KeccakP1600_Permute_12rounds@PLT
+    call            KeccakP1600_AVX2_Permute_12rounds@PLT
 .endif
     pop             %rcx
     pop             %rdx
@@ -1014,7 +1014,7 @@ KeccakP1600_12rounds_FastLoop_Absorb_LanesAddLoop:
     jae             KeccakP1600_12rounds_FastLoop_Absorb_Not17Lanes
     jmp             KeccakP1600_12rounds_FastLoop_Absorb_Exit
 .ifndef old_gas_syntax
-.size   KeccakP1600_12rounds_FastLoop_Absorb,.-KeccakP1600_12rounds_FastLoop_Absorb
+.size   KeccakP1600_12rounds_AVX2_FastLoop_Absorb,.-KeccakP1600_12rounds_AVX2_FastLoop_Absorb
 .endif
 
 .ifndef old_gas_syntax

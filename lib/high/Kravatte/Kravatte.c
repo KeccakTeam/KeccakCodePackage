@@ -273,26 +273,29 @@ static const unsigned char * Kra_Compress( unsigned char *k, unsigned char *x, c
     unsigned char encbuf[MaxParallellism*Kravatte_RollcSizeInBytes];
     size_t messageByteLen = *messageBitLen / 8; /* do not include partial last byte */
 
-    #if defined(KeccakP1600times8_implementation)
-    #if defined(KeccakF1600times8_FastKravatte_supported)
-    ParallelCompressLoopFast( 8 )
-    #else
-    ParallelCompressLoopPlSnP( 8 )
+    #if defined(XKCP_has_KeccakP1600times8)
+    if (KeccakP1600times8_GetFeatures() & PlSnP_Feature_Farfalle) {
+        ParallelCompressLoopFast( 8 )
+    }
+    else if (KeccakP1600times8_GetFeatures() & PlSnP_Feature_Main) {
+        ParallelCompressLoopPlSnP( 8 )
+    }
     #endif
+    #if defined(XKCP_has_KeccakP1600times4)
+    if (KeccakP1600times4_GetFeatures() & PlSnP_Feature_Farfalle) {
+        ParallelCompressLoopFast( 4 )
+    }
+    else if (KeccakP1600times4_GetFeatures() & PlSnP_Feature_Main) {
+        ParallelCompressLoopPlSnP( 4 )
+    }
     #endif
-    #if defined(KeccakP1600times4_implementation)
-    #if defined(KeccakF1600times4_FastKravatte_supported)
-    ParallelCompressLoopFast( 4 )
-    #else
-    ParallelCompressLoopPlSnP( 4 )
-    #endif
-    #endif
-    #if defined(KeccakP1600times2_implementation)
-    #if defined(KeccakF1600times2_FastKravatte_supported)
-    ParallelCompressLoopFast( 2 )
-    #else
-    ParallelCompressLoopPlSnP( 2 )
-    #endif
+    #if defined(XKCP_has_KeccakP1600times2)
+    if (KeccakP1600times2_GetFeatures() & PlSnP_Feature_Farfalle) {
+        ParallelCompressLoopFast( 2 )
+    }
+    else if (KeccakP1600times2_GetFeatures() & PlSnP_Feature_Main) {
+        ParallelCompressLoopPlSnP( 2 )
+    }
     #endif
 
     if (messageByteLen >= SnP_widthInBytes) {
@@ -468,26 +471,29 @@ int Vatte(Kravatte_Instance *kv, BitSequence *output, BitLength outputBitLen, in
     }
 
     outputByteLen = (outputBitLen + 7) / 8;
-    #if defined(KeccakP1600times8_implementation)
-    #if defined(KeccakF1600times8_FastKravatte_supported)
-    ParallelExpandLoopFast( 8 )
-    #else
-    ParallelExpandLoopPlSnP( 8 )
+    #if defined(XKCP_has_KeccakP1600times8)
+    if (KeccakP1600times8_GetFeatures() & PlSnP_Feature_Farfalle) {
+        ParallelExpandLoopFast( 8 )
+    }
+    else if (KeccakP1600times8_GetFeatures() & PlSnP_Feature_Main) {
+        ParallelExpandLoopPlSnP( 8 )
+    }
     #endif
+    #if defined(XKCP_has_KeccakP1600times4)
+    if (KeccakP1600times4_GetFeatures() & PlSnP_Feature_Farfalle) {
+        ParallelExpandLoopFast( 4 )
+    }
+    else if (KeccakP1600times4_GetFeatures() & PlSnP_Feature_Main) {
+        ParallelExpandLoopPlSnP( 4 )
+    }
     #endif
-    #if defined(KeccakP1600times4_implementation)
-    #if defined(KeccakF1600times4_FastKravatte_supported)
-    ParallelExpandLoopFast( 4 )
-    #else
-    ParallelExpandLoopPlSnP( 4 )
-    #endif
-    #endif
-    #if defined(KeccakP1600times2_implementation)
-    #if defined(KeccakF1600times2_FastKravatte_supported)
-    ParallelExpandLoopFast( 2 )
-    #else
-    ParallelExpandLoopPlSnP( 2 )
-    #endif
+    #if defined(XKCP_has_KeccakP1600times2)
+    if (KeccakP1600times2_GetFeatures() & PlSnP_Feature_Farfalle) {
+        ParallelExpandLoopFast( 2 )
+    }
+    else if (KeccakP1600times2_GetFeatures() & PlSnP_Feature_Main) {
+        ParallelExpandLoopPlSnP( 2 )
+    }
     #endif
     if ( outputByteLen != 0 ) {
         KeccakP1600_state state;

@@ -282,98 +282,103 @@ static void Xoofff_Rolle( uint32_t *a, unsigned char *encbuf, unsigned int paral
     DUMP("Roll-e next", a, Xoofff_RollSizeInBytes);
 }
 
-#if !defined(Xoodoo_FastXoofff_supported)
-
-#if !defined(Xoofff_AddIs)
-void Xoofff_AddIs(unsigned char *output, const unsigned char *input, size_t bitLen)
+void Xoofff_AddIs_dispatch(unsigned char *output, const unsigned char *input, size_t bitLen)
 {
-    size_t  byteLen = bitLen / 8;
+    if (Xoodoo_GetFeatures() & SnP_Feature_Farfalle)
+        Xoofff_AddIs(output, input, bitLen);
+    else {
+        size_t  byteLen = bitLen / 8;
 
-    #if !defined(NO_MISALIGNED_ACCESSES)
-    while ( byteLen >= 32 ) {
-        *((uint64_t*)(output+0)) ^= *((const uint64_t*)(input+0));
-        *((uint64_t*)(output+8)) ^= *((const uint64_t*)(input+8));
-        *((uint64_t*)(output+16)) ^= *((const uint64_t*)(input+16));
-        *((uint64_t*)(output+24)) ^= *((const uint64_t*)(input+24));
-        input += 32;
-        output += 32;
-        byteLen -= 32;
-    }
-    while ( byteLen >= 8 ) {
-        *((uint64_t*)output) ^= *((const uint64_t*)input);
-        input += 8;
-        output += 8;
-        byteLen -= 8;
-    }
-    #endif
+        #if !defined(NO_MISALIGNED_ACCESSES)
+        while ( byteLen >= 32 ) {
+            *((uint64_t*)(output+0)) ^= *((const uint64_t*)(input+0));
+            *((uint64_t*)(output+8)) ^= *((const uint64_t*)(input+8));
+            *((uint64_t*)(output+16)) ^= *((const uint64_t*)(input+16));
+            *((uint64_t*)(output+24)) ^= *((const uint64_t*)(input+24));
+            input += 32;
+            output += 32;
+            byteLen -= 32;
+        }
+        while ( byteLen >= 8 ) {
+            *((uint64_t*)output) ^= *((const uint64_t*)input);
+            input += 8;
+            output += 8;
+            byteLen -= 8;
+        }
+        #endif
 
-    while ( byteLen-- != 0 )
-    {
-        *output++ ^= *input++;
-    }
+        while ( byteLen-- != 0 )
+        {
+            *output++ ^= *input++;
+        }
 
-    bitLen &= 7;
-    if (bitLen != 0)
-    {
-        *output ^= *input;
-        *output &= (1 << bitLen) - 1;
+        bitLen &= 7;
+        if (bitLen != 0)
+        {
+            *output ^= *input;
+            *output &= (1 << bitLen) - 1;
+        }
     }
 }
 
-#endif
-
-size_t Xoofff_CompressFastLoop(unsigned char *k, unsigned char *x, const unsigned char *input, size_t length)
+size_t Xoofff_CompressFastLoop_dispatch(unsigned char *k, unsigned char *x, const unsigned char *input, size_t length)
 {
-    unsigned char encbuf[Xoofff_RollSizeInBytes];
-    Xoodoo_state state;
-    size_t    initialLength = length;
+    if (Xoodoo_GetFeatures() & SnP_Feature_Farfalle)
+        return Xoofff_CompressFastLoop(k, x, input, length);
+    else {
+        unsigned char encbuf[Xoofff_RollSizeInBytes];
+        Xoodoo_state state;
+        size_t    initialLength = length;
 
-    #if DEBUG
-    assert(length >= SnP_widthInBytes);
-    #endif
-    Xoodoo_StaticInitialize();
-    mInitialize(state);
-    do {
-        Xoodoo_OverwriteBytes(&state, k, 0, SnP_widthInBytes);
-        Xoofff_Rollc((uint32_t*)k, encbuf, 1);
-        Xoodoo_AddBytes(&state, input, 0, SnP_widthInBytes);
-        DUMP("msg p1", input, SnP_widthInBytes);
-        Xoodoo_Permute_6rounds(&state);
-        Xoodoo_ExtractAndAddBytes(&state, x, x, 0, SnP_widthInBytes);
-        DUMP("xAc p1", x, SnP_widthInBytes);
-        input += SnP_widthInBytes;
-        length -= SnP_widthInBytes;
+        #if DEBUG
+        assert(length >= SnP_widthInBytes);
+        #endif
+        Xoodoo_StaticInitialize();
+        mInitialize(state);
+        do {
+            Xoodoo_OverwriteBytes(&state, k, 0, SnP_widthInBytes);
+            Xoofff_Rollc((uint32_t*)k, encbuf, 1);
+            Xoodoo_AddBytes(&state, input, 0, SnP_widthInBytes);
+            DUMP("msg p1", input, SnP_widthInBytes);
+            Xoodoo_Permute_6rounds(&state);
+            Xoodoo_ExtractAndAddBytes(&state, x, x, 0, SnP_widthInBytes);
+            DUMP("xAc p1", x, SnP_widthInBytes);
+            input += SnP_widthInBytes;
+            length -= SnP_widthInBytes;
+        }
+        while (length >= SnP_widthInBytes);
+
+        return initialLength - length;
     }
-    while (length >= SnP_widthInBytes);
-
-    return initialLength - length;
 }
 
-size_t Xoofff_ExpandFastLoop(unsigned char *yAccu, const unsigned char *kRoll, unsigned char *output, size_t length)
+size_t Xoofff_ExpandFastLoop_dispatch(unsigned char *yAccu, const unsigned char *kRoll, unsigned char *output, size_t length)
 {
-    unsigned char encbuf[Xoofff_RollSizeInBytes];
-    Xoodoo_state state;
-    size_t    initialLength = length;
+    if (Xoodoo_GetFeatures() & SnP_Feature_Farfalle)
+        return Xoofff_ExpandFastLoop(yAccu, kRoll, output, length);
+    else {
+        unsigned char encbuf[Xoofff_RollSizeInBytes];
+        Xoodoo_state state;
+        size_t    initialLength = length;
 
-    #if DEBUG
-    assert(length >= SnP_widthInBytes);
-    #endif
-    Xoodoo_StaticInitialize();
-    mInitialize(state);
-    do {
-        Xoodoo_OverwriteBytes(&state, yAccu, 0, SnP_widthInBytes);
-        Xoofff_Rolle((uint32_t*)yAccu, encbuf, 1);
-        Xoodoo_Permute_6rounds(&state);
-        Xoodoo_ExtractAndAddBytes(&state, kRoll, output, 0, SnP_widthInBytes);
-        DUMP("out 1", output, SnP_widthInBytes);
-        output += SnP_widthInBytes;
-        length -= SnP_widthInBytes;
-    } while (length >= SnP_widthInBytes);
+        #if DEBUG
+        assert(length >= SnP_widthInBytes);
+        #endif
+        Xoodoo_StaticInitialize();
+        mInitialize(state);
+        do {
+            Xoodoo_OverwriteBytes(&state, yAccu, 0, SnP_widthInBytes);
+            Xoofff_Rolle((uint32_t*)yAccu, encbuf, 1);
+            Xoodoo_Permute_6rounds(&state);
+            Xoodoo_ExtractAndAddBytes(&state, kRoll, output, 0, SnP_widthInBytes);
+            DUMP("out 1", output, SnP_widthInBytes);
+            output += SnP_widthInBytes;
+            length -= SnP_widthInBytes;
+        } while (length >= SnP_widthInBytes);
 
-    return initialLength - length;
+        return initialLength - length;
+    }
 }
-
-#endif
 
 static const unsigned char * Xoodoo_CompressBlocks( unsigned char *k, unsigned char *x, const BitSequence *message, BitLength *messageBitLen, int lastFlag )
 {
@@ -381,36 +386,40 @@ static const unsigned char * Xoodoo_CompressBlocks( unsigned char *k, unsigned c
     size_t messageByteLen = *messageBitLen / 8; /* do not include partial last byte */
 
     #if defined(XKCP_has_Xoodootimes16)
-    #if defined(Xoodootimes16_FastXoofff_supported)
-    ParallelCompressLoopFast( 16 )
-    #else
-    ParallelCompressLoopPlSnP( 16 )
-    #endif
+    if (Xoodootimes16_GetFeatures() & PlSnP_Feature_Farfalle) {
+        ParallelCompressLoopFast( 16 )
+    }
+    else if (Xoodootimes16_GetFeatures() & PlSnP_Feature_Main) {
+        ParallelCompressLoopPlSnP( 16 )
+    }
     #endif
     #if defined(XKCP_has_Xoodootimes8)
-    #if defined(Xoodootimes8_FastXoofff_supported)
-    ParallelCompressLoopFast( 8 )
-    #else
-    ParallelCompressLoopPlSnP( 8 )
-    #endif
+    if (Xoodootimes8_GetFeatures() & PlSnP_Feature_Farfalle) {
+        ParallelCompressLoopFast( 8 )
+    }
+    else if (Xoodootimes8_GetFeatures() & PlSnP_Feature_Main) {
+        ParallelCompressLoopPlSnP( 8 )
+    }
     #endif
     #if defined(XKCP_has_Xoodootimes4)
-    #if defined(Xoodootimes4_FastXoofff_supported)
-    ParallelCompressLoopFast( 4 )
-    #else
-    ParallelCompressLoopPlSnP( 4 )
-    #endif
+    if (Xoodootimes4_GetFeatures() & PlSnP_Feature_Farfalle) {
+        ParallelCompressLoopFast( 4 )
+    }
+    else if (Xoodootimes4_GetFeatures() & PlSnP_Feature_Main) {
+        ParallelCompressLoopPlSnP( 4 )
+    }
     #endif
     #if defined(XKCP_has_Xoodootimes2)
-    #if defined(Xoodootimes2_FastXoofff_supported)
-    ParallelCompressLoopFast( 2 )
-    #else
-    ParallelCompressLoopPlSnP( 2 )
-    #endif
+    if (Xoodootimes2_GetFeatures() & PlSnP_Feature_Farfalle) {
+        ParallelCompressLoopFast( 2 )
+    }
+    else if (Xoodootimes2_GetFeatures() & PlSnP_Feature_Main) {
+        ParallelCompressLoopPlSnP( 2 )
+    }
     #endif
 
     if (messageByteLen >= SnP_widthInBytes) {
-        size_t processed = Xoofff_CompressFastLoop(k, x, message, messageByteLen);
+        size_t processed = Xoofff_CompressFastLoop_dispatch(k, x, message, messageByteLen);
         message += processed;
         messageByteLen -= processed;
     }
@@ -571,35 +580,40 @@ int Xoofff_Expand(Xoofff_Instance *xp, BitSequence *output, BitLength outputBitL
 
     outputByteLen = (outputBitLen + 7) / 8;
     #if defined(XKCP_has_Xoodootimes16)
-    #if defined(Xoodootimes16_FastXoofff_supported)
-    ParallelExpandLoopFast( 16 )
-    #else
-    ParallelExpandLoopPlSnP( 16 )
-    #endif
+    if (Xoodootimes16_GetFeatures() & PlSnP_Feature_Farfalle) {
+        ParallelExpandLoopFast( 16 )
+    }
+    else if (Xoodootimes16_GetFeatures() & PlSnP_Feature_Main) {
+        ParallelExpandLoopPlSnP( 16 )
+    }
     #endif
     #if defined(XKCP_has_Xoodootimes8)
-    #if defined(Xoodootimes8_FastXoofff_supported)
-    ParallelExpandLoopFast( 8 )
-    #else
-    ParallelExpandLoopPlSnP( 8 )
-    #endif
+    if (Xoodootimes8_GetFeatures() & PlSnP_Feature_Farfalle) {
+        ParallelExpandLoopFast( 8 )
+    }
+    else if (Xoodootimes8_GetFeatures() & PlSnP_Feature_Main) {
+        ParallelExpandLoopPlSnP( 8 )
+    }
     #endif
     #if defined(XKCP_has_Xoodootimes4)
-    #if defined(Xoodootimes4_FastXoofff_supported)
-    ParallelExpandLoopFast( 4 )
-    #else
-    ParallelExpandLoopPlSnP( 4 )
-    #endif
+    if (Xoodootimes4_GetFeatures() & PlSnP_Feature_Farfalle) {
+        ParallelExpandLoopFast( 4 )
+    }
+    else if (Xoodootimes4_GetFeatures() & PlSnP_Feature_Main) {
+        ParallelExpandLoopPlSnP( 4 )
+    }
     #endif
     #if defined(XKCP_has_Xoodootimes2)
-    #if defined(Xoodootimes2_FastXoofff_supported)
-    ParallelExpandLoopFast( 2 )
-    #else
-    ParallelExpandLoopPlSnP( 2 )
+    if (Xoodootimes2_GetFeatures() & PlSnP_Feature_Farfalle) {
+        ParallelExpandLoopFast( 2 )
+    }
+    else if (Xoodootimes2_GetFeatures() & PlSnP_Feature_Main) {
+        ParallelExpandLoopPlSnP( 2 )
+    }
     #endif
-    #endif
+
     if ( outputByteLen >= SnP_widthInBytes ) {
-        size_t processed = Xoofff_ExpandFastLoop(xp->yAccu, xp->kRoll, output, outputByteLen);
+        size_t processed = Xoofff_ExpandFastLoop_dispatch(xp->yAccu, xp->kRoll, output, outputByteLen);
         output += processed;
         outputByteLen -= processed;
     }

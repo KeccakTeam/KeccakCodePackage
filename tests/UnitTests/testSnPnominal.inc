@@ -180,12 +180,12 @@ http://creativecommons.org/publicdomain/zero/1.0/
         unsigned char buffer[SnP_laneLengthInBytes*100+10+8];
         unsigned i, blocks, extra, laneCount, alignment;
 
-        assert(SnP_FastLoop_Absorb(stateTest, SnP_laneCount, buffer, SnP_laneCount-1) == 0);
+        assert(SnP_FastLoop_Absorb_dispatch(stateTest, SnP_laneCount, buffer, SnP_laneCount-1) == 0);
         for(laneCount=1; laneCount<SnP_laneCount; laneCount++) {
             alignment = (laneCount+1)%8;
             for(i=0; i<laneCount*SnP_laneLengthInBytes; i++)
                 buffer[i+alignment] = 0x11+2*laneCount+4*i;
-            assert(SnP_FastLoop_Absorb(stateTest, laneCount, buffer+alignment, laneCount*SnP_laneLengthInBytes)
+            assert(SnP_FastLoop_Absorb_dispatch(stateTest, laneCount, buffer+alignment, laneCount*SnP_laneLengthInBytes)
                 == laneCount*SnP_laneLengthInBytes);
         }
         blocks = 7;
@@ -195,7 +195,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
             assert(blocks*laneCount*SnP_laneLengthInBytes+extra+alignment <= sizeof(buffer));
             for(i=0; i<sizeof(buffer)-8; i++)
                 buffer[i+alignment] = 0xA0 - 17*i + 2*alignment - 4*laneCount;
-            assert(SnP_FastLoop_Absorb(stateTest, laneCount, buffer+alignment, blocks*laneCount*SnP_laneLengthInBytes+extra)
+            assert(SnP_FastLoop_Absorb_dispatch(stateTest, laneCount, buffer+alignment, blocks*laneCount*SnP_laneLengthInBytes+extra)
                 == blocks*laneCount*SnP_laneLengthInBytes);
             blocks--;
             extra++;

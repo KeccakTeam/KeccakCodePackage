@@ -19,6 +19,8 @@ Please refer to PlSnP-documentation.h for more details.
 #define _KeccakP_1600_times2_SnP_h_
 
 #include <stdint.h>
+#include "config.h"
+#include "PlSnP-common.h"
 
 typedef struct {
     ALIGN(32) uint64_t A[25][2];
@@ -26,7 +28,8 @@ typedef struct {
 
 typedef KeccakP1600times2_align256SIMD128_states KeccakP1600times2_states;
 
-#define KeccakP1600times2_implementation        "64-bit optimized ARM NEON assembler implementation"
+#define KeccakP1600times2_GetImplementation()   "64-bit optimized ARM NEON assembler implementation"
+#define KeccakP1600times2_GetFeatures()         PlSnP_Feature_Main
 #define KeccakP1600times2_statesAlignment       32
 
 void KeccakP1600times2_StaticInitialize( void );
@@ -45,5 +48,14 @@ void KeccakP1600times2_ExtractBytes(const KeccakP1600times2_states *states, unsi
 void KeccakP1600times2_ExtractLanesAll(const KeccakP1600times2_states *states, unsigned char *data, unsigned int laneCount, unsigned int laneOffset);
 void KeccakP1600times2_ExtractAndAddBytes(const KeccakP1600times2_states *states, unsigned int instanceIndex,  const unsigned char *input, unsigned char *output, unsigned int offset, unsigned int length);
 void KeccakP1600times2_ExtractAndAddLanesAll(const KeccakP1600times2_states *states, const unsigned char *input, unsigned char *output, unsigned int laneCount, unsigned int laneOffset);
+
+#define KeccakF1600times2_FastLoop_Absorb(...)          0
+#define KeccakP1600times2_12rounds_FastLoop_Absorb(...) 0
+
+#define KeccakP1600times2_KravatteCompress(...)         0
+#define KeccakP1600times2_KravatteExpand(...)           0
+
+#define KeccakP1600times2_KT128ProcessLeaves(...)
+#define KeccakP1600times2_KT256ProcessLeaves(...)
 
 #endif

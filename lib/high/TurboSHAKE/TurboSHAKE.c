@@ -16,6 +16,10 @@ http://creativecommons.org/publicdomain/zero/1.0/
 
 #include "TurboSHAKE.h"
 
+#ifdef KeccakReference
+    #include "displayIntermediateValues.h"
+#endif
+
 #ifdef XKCP_has_KeccakP1600
     #include "KeccakP-1600-SnP.h"
 
@@ -24,9 +28,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
     #define SnP_state KeccakP1600_state
     #define SnP_width 1600
     #define SnP_Permute KeccakP1600_Permute_12rounds
-    #if defined(KeccakP1600_12rounds_FastLoop_supported)
-        #define SnP_FastLoop_Absorb KeccakP1600_12rounds_FastLoop_Absorb
-    #endif
+    #define SnP_FastLoop_Absorb KeccakP1600_12rounds_FastLoop_Absorb
         #include "KeccakSponge.inc"
     #undef prefix
     #undef SnP

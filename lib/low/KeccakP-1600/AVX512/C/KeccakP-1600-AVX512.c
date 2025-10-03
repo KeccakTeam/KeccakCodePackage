@@ -36,176 +36,16 @@ We would like to thank Vladimir Sedach, we have used parts of his Keccak AVX-512
 #include <emmintrin.h>
 #include "align.h"
 #include "brg_endian.h"
-#include "KeccakP-1600-AVX512-config.h"
 #include "KeccakP-1600-SnP.h"
 
 #if (PLATFORM_BYTE_ORDER != IS_LITTLE_ENDIAN)
 #error Expecting a little-endian platform
 #endif
 
-#ifdef KeccakP1600_fullUnrolling
+#ifdef KeccakP1600_AVX512_fullUnrolling
 #define FullUnrolling
 #else
-#define Unrolling KeccakP1600_unrolling
-#endif
-
-/* Comment the define hereunder when compiling for a CPU with AVX-512 SIMD */
-/* 
- * Warning: This code has only been tested on Haswell (AVX2) with SIMULATE_AVX512 defined,
- *          errors will occur if we did a bad interpretation of the AVX-512 intrinsics' 
- *          API or functionality.
- */
-/* #define SIMULATE_AVX512 */
-
-#if defined(SIMULATE_AVX512)
-
-typedef struct
-{
-    uint64_t x[8];
-} __m512i;
-
-static __m512i _mm512_xor_si512( __m512i a, __m512i b)
-{
-    __m512i r;
-    unsigned int i;
-
-    for ( i = 0; i < 8; ++i )
-        r.x[i] = a.x[i] ^ b.x[i];
-    return(r);
-}
-
-static __m512i _mm512_ternarylogic_epi64(__m512i a, __m512i b, __m512i c, int imm)
-{
-
-    if (imm == 0x96)
-        return ( _mm512_xor_si512( _mm512_xor_si512( a, b ), c ) );
-    if (imm == 0xD2) {
-        __m512i t;
-        unsigned int i;
-
-        for ( i = 0; i < 8; ++i )
-            t.x[i] = ~b.x[i] & c.x[i];
-        return ( _mm512_xor_si512( a, t ) );
-    }
-    printf( "_mm512_ternarylogic_epi64( a, b, c, %02X) not implemented!\n", imm );
-    exit(1);
-
-}
-
-static __m512i _mm512_rol_epi64(__m512i a, int offset)
-{
-    __m512i r;
-    unsigned int i;
-
-    for ( i = 0; i < 8; ++i )
-        r.x[i] = (a.x[i] << offset) | (a.x[i] >> (64-offset));
-    return(r);
-}
-
-static __m512i _mm512_rolv_epi64(__m512i a, __m512i offset)
-{
-    __m512i r;
-    unsigned int i;
-
-    for ( i = 0; i < 8; ++i )
-        r.x[i] = (a.x[i] << offset.x[i]) | (a.x[i] >> (64-offset.x[i]));
-    return(r);
-}
-
-static __m512i _mm512_setr_epi64(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e, uint64_t f, uint64_t g, uint64_t h)
-{
-    __m512i r;
-
-    r.x[0] = a;
-    r.x[1] = b;
-    r.x[2] = c;
-    r.x[3] = d;
-    r.x[4] = e;
-    r.x[5] = f;
-    r.x[6] = g;
-    r.x[7] = h;
-    return(r);
-}
-
-static __m512i _mm512_permutexvar_epi64(__m512i idx, __m512i v)
-{
-    __m512i r;
-    unsigned int i;
-
-    for ( i = 0; i < 8; ++i )
-        r.x[i] = v.x[idx.x[i]];
-    return(r);
-}
-
-static __m512i _mm512_permutex2var_epi64(__m512i a, __m512i idx, __m512i b)
-{
-    __m512i r;
-    unsigned int i;
-    unsigned int index;
-
-    for ( i = 0; i < 8; ++i ) {
-        index = idx.x[i] & 7;
-        r.x[i] = (idx.x[i] & 8) ? b.x[index] : a.x[index];
-    }
-    return(r);
-}
-
-static __m512i _mm512_unpacklo_epi64(__m512i a, __m512i b)
-{
-    __m512i r;
-    unsigned int i;
-
-    for ( i = 0; i < 8; i += 2 ) {
-        r.x[i]   = a.x[i];
-        r.x[i+1] = b.x[i];
-    }
-    return(r);
-}
-
-static __m512i _mm512_unpackhi_epi64(__m512i a, __m512i b)
-{
-    __m512i r;
-    unsigned int i;
-
-    for ( i = 0; i < 8; i += 2 ) {
-        r.x[i]   = a.x[i+1];
-        r.x[i+1] = b.x[i+1];
-    }
-    return(r);
-}
-
-static __m512i _mm512_mask_blend_epi64(unsigned char mask, __m512i a, __m512i b)
-{
-    __m512i r;
-    unsigned int i;
-
-    for ( i = 0; i < 8; ++i, mask >>= 1 )
-        r.x[i] = (mask & 1) ? b.x[i] : a.x[i];
-    return(r);
-}
-
-static __m512i _mm512_maskz_loadu_epi64( unsigned char mask, const void * a)
-{
-    __m512i r;
-    unsigned int i;
-    const uint64_t *p = a;
-
-    for ( i = 0; i < 8; ++i, mask >>= 1 )
-        r.x[i] = (mask & 1) ? p[i] : 0;
-    return(r);
-}
-
-static void _mm512_mask_storeu_epi64( void * a, unsigned char mask, __m512i v)
-{
-    unsigned int i;
-    uint64_t *p = a;
-
-    for ( i = 0; i < 8; ++i, mask >>= 1 )
-        if ( mask & 1 )
-            p[i] = v.x[i];
-}
-
-
+#define Unrolling KeccakP1600_AVX512_unrolling
 #endif
 
 typedef __m512i     V512;
@@ -526,7 +366,7 @@ void KeccakP1600_Permute_Nrounds(KeccakP1600_plain64_state *state, unsigned int 
 void KeccakP1600_Permute_12rounds(KeccakP1600_plain64_state *state)
 {
     KeccakP_DeclareVars
-    #ifndef KeccakP1600_fullUnrolling
+    #ifndef KeccakP1600_AVX512_fullUnrolling
     unsigned int i;
     #endif
     uint64_t *stateAsLanes = state->A;
@@ -541,7 +381,7 @@ void KeccakP1600_Permute_12rounds(KeccakP1600_plain64_state *state)
 void KeccakP1600_Permute_24rounds(KeccakP1600_plain64_state *state)
 {
     KeccakP_DeclareVars
-    #ifndef KeccakP1600_fullUnrolling
+    #ifndef KeccakP1600_AVX512_fullUnrolling
     unsigned int i;
     #endif
     uint64_t *stateAsLanes = state->A;
@@ -557,7 +397,7 @@ size_t KeccakF1600_FastLoop_Absorb(KeccakP1600_plain64_state *state, unsigned in
 
     if (laneCount == 21) {
         KeccakP_DeclareVars;
-        #ifndef KeccakP1600_fullUnrolling
+        #ifndef KeccakP1600_AVX512_fullUnrolling
         unsigned int i;
         #endif
         uint64_t *stateAsLanes = state->A;
@@ -593,7 +433,7 @@ size_t KeccakP1600_12rounds_FastLoop_Absorb(KeccakP1600_plain64_state *state, un
 
     if (laneCount == 21) {
         KeccakP_DeclareVars;
-        #if !defined(KeccakP1600_fullUnrolling) && (KeccakP1600_unrolling < 12)
+        #if !defined(KeccakP1600_AVX512_fullUnrolling) && (KeccakP1600_AVX512_unrolling < 12)
         unsigned int i;
         #endif
         uint64_t *stateAsLanes = state->A;

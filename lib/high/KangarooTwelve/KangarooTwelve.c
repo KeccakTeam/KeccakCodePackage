@@ -197,92 +197,62 @@ int KangarooTwelve_Update(KangarooTwelve_Instance *ktInstance, const unsigned ch
         }
     }
 
-    #if defined(KeccakP1600times8_implementation)
-        #if defined(KeccakP1600times8_KT128ProcessLeaves_supported) || defined(KeccakP1600times8_KT256ProcessLeaves_supported)
+#ifdef XKCP_has_KeccakP1600times8
+    if (KeccakP1600times8_GetFeatures()) {
+        if (KeccakP1600times8_GetFeatures() & PlSnP_Feature_KangarooTwelve) {
             if (ktInstance->securityLevel == 128) {
-                #if defined(KeccakP1600times8_KT128ProcessLeaves_supported)
-                    ProcessLeavesKT128( 8 )
-                #elif defined(KeccakP1600times8_12rounds_FastLoop_supported)
-                    ParallelSpongeFastLoop( 8 )
-                #else
-                    ParallelSpongeLoop( 8 )
-                #endif
+                ProcessLeavesKT128( 8 )
             }
             else {
-                #if defined(KeccakP1600times8_KT256ProcessLeaves_supported)
-                    ProcessLeavesKT256( 8 )
-                #elif defined(KeccakP1600times8_12rounds_FastLoop_supported)
-                    ParallelSpongeFastLoop( 8 )
-                #else
-                    ParallelSpongeLoop( 8 )
-                #endif
+                ProcessLeavesKT256( 8 )
             }
-        #else
-            #if defined(KeccakP1600times8_12rounds_FastLoop_supported)
+        }
+        else if (KeccakP1600times8_GetFeatures() & PlSnP_Feature_SpongeAbsorb) {
             ParallelSpongeFastLoop( 8 )
-            #else
+        }
+        else {
             ParallelSpongeLoop( 8 )
-            #endif
-        #endif
-    #endif
+        }
+    }
+#endif
 
-    #if defined(KeccakP1600times4_implementation)
-        #if defined(KeccakP1600times4_KT128ProcessLeaves_supported) || defined(KeccakP1600times4_KT256ProcessLeaves_supported)
+#ifdef XKCP_has_KeccakP1600times4
+    if (KeccakP1600times4_GetFeatures()) {
+        if (KeccakP1600times4_GetFeatures() & PlSnP_Feature_KangarooTwelve) {
             if (ktInstance->securityLevel == 128) {
-                #if defined(KeccakP1600times4_KT128ProcessLeaves_supported)
-                    ProcessLeavesKT128( 4 )
-                #elif defined(KeccakP1600times4_12rounds_FastLoop_supported)
-                    ParallelSpongeFastLoop( 4 )
-                #else
-                    ParallelSpongeLoop( 4 )
-                #endif
+                ProcessLeavesKT128( 4 )
             }
             else {
-                #if defined(KeccakP1600times4_KT256ProcessLeaves_supported)
-                    ProcessLeavesKT256( 4 )
-                #elif defined(KeccakP1600times4_12rounds_FastLoop_supported)
-                    ParallelSpongeFastLoop( 4 )
-                #else
-                    ParallelSpongeLoop( 4 )
-                #endif
+                ProcessLeavesKT256( 4 )
             }
-        #else
-            #if defined(KeccakP1600times4_12rounds_FastLoop_supported)
+        }
+        else if (KeccakP1600times4_GetFeatures() & PlSnP_Feature_SpongeAbsorb) {
             ParallelSpongeFastLoop( 4 )
-            #else
+        }
+        else {
             ParallelSpongeLoop( 4 )
-            #endif
-        #endif
-    #endif
+        }
+    }
+#endif
 
-    #if defined(KeccakP1600times2_implementation)
-        #if defined(KeccakP1600times2_KT128ProcessLeaves_supported) || defined(KeccakP1600times2_KT256ProcessLeaves_supported)
+#ifdef XKCP_has_KeccakP1600times2
+    if (KeccakP1600times2_GetFeatures()) {
+        if (KeccakP1600times2_GetFeatures() & PlSnP_Feature_KangarooTwelve) {
             if (ktInstance->securityLevel == 128) {
-                #if defined(KeccakP1600times2_KT128ProcessLeaves_supported)
-                    ProcessLeavesKT128( 2 )
-                #elif defined(KeccakP1600times2_12rounds_FastLoop_supported)
-                    ParallelSpongeFastLoop( 2 )
-                #else
-                    ParallelSpongeLoop( 2 )
-                #endif
+                ProcessLeavesKT128( 2 )
             }
             else {
-                #if defined(KeccakP1600times2_KT256ProcessLeaves_supported)
-                    ProcessLeavesKT256( 2 )
-                #elif defined(KeccakP1600times2_12rounds_FastLoop_supported)
-                    ParallelSpongeFastLoop( 2 )
-                #else
-                    ParallelSpongeLoop( 2 )
-                #endif
+                ProcessLeavesKT256( 2 )
             }
-        #else
-            #if defined(KeccakP1600times2_12rounds_FastLoop_supported)
+        }
+        else if (KeccakP1600times2_GetFeatures() & PlSnP_Feature_SpongeAbsorb) {
             ParallelSpongeFastLoop( 2 )
-            #else
+        }
+        else {
             ParallelSpongeLoop( 2 )
-            #endif
-        #endif
-    #endif
+        }
+    }
+#endif
 
     while ( inLen > 0 ) {
         unsigned int len = (inLen < chunkSize) ? (unsigned int)inLen : chunkSize;

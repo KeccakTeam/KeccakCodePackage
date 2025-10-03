@@ -18,6 +18,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #include <string.h>
 #include "config.h"
 
+#include "SnP-implementations.h"
 #include "testPermutations.h"
 #include "testSponge.h"
 #include "testDuplex.h"
@@ -610,6 +611,7 @@ int process(int argc, char* argv[])
         printHelp();
         return 0;
     }
+    XKCP_PrintImplementations();
     if (SnP) {
         testPermutations();
     }

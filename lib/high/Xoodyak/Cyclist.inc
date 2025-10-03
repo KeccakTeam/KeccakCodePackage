@@ -17,6 +17,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #define JOIN0(a, b)                     a ## b
 #define JOIN(a, b)                      JOIN0(a, b)
 
+#define SnP_GetFeatures                 JOIN(SnP, _GetFeatures)
 #define SnP_StaticInitialize            JOIN(SnP, _StaticInitialize)
 #define SnP_Initialize                  JOIN(SnP, _Initialize)
 #define SnP_AddBytes                    JOIN(SnP, _AddBytes)
@@ -47,14 +48,12 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #define Cyclist_Rkout                   JOIN(prefix, _Rkout)
 #define Cyclist_lRatchet                JOIN(prefix, _lRatchet)
 
-#if defined(CyclistFullBlocks_supported)
 #define Cyclist_AbsorbKeyedFullBlocks   JOIN(prefix, _AbsorbKeyedFullBlocks)
 #define Cyclist_AbsorbHashFullBlocks    JOIN(prefix, _AbsorbHashFullBlocks)
 #define Cyclist_SqueezeKeyedFullBlocks  JOIN(prefix, _SqueezeKeyedFullBlocks)
 #define Cyclist_SqueezeHashFullBlocks   JOIN(prefix, _SqueezeHashFullBlocks)
 #define Cyclist_EncryptFullBlocks       JOIN(prefix, _EncryptFullBlocks)
 #define Cyclist_DecryptFullBlocks       JOIN(prefix, _DecryptFullBlocks)
-#endif
 
 /* ------- Cyclist internal interfaces ------- */
 
@@ -110,18 +109,18 @@ static void Cyclist_AbsorbAny(Cyclist_Instance *instance, const uint8_t *X, size
         Cd = 0;
         X       += splitLen;
         XLen    -= splitLen;
-        #if defined(CyclistFullBlocks_supported)
-        if ((r == Cyclist_Rkin) && (XLen >= Cyclist_Rkin)) {
-            size_t  lenProcessed = Cyclist_AbsorbKeyedFullBlocks(&instance->state, X, XLen);
-            X       += lenProcessed;
-            XLen    -= lenProcessed;
+        if (SnP_GetFeatures() & SnP_Feature_Cyclist) {
+            if ((r == Cyclist_Rkin) && (XLen >= Cyclist_Rkin)) {
+                size_t  lenProcessed = Cyclist_AbsorbKeyedFullBlocks(&instance->state, X, XLen);
+                X       += lenProcessed;
+                XLen    -= lenProcessed;
+            }
+            else if ((r == Cyclist_Rhash) && (XLen >= Cyclist_Rhash)) {
+                size_t  lenProcessed = Cyclist_AbsorbHashFullBlocks(&instance->state, X, XLen);
+                X       += lenProcessed;
+                XLen    -= lenProcessed;
+            }
         }
-        else if ((r == Cyclist_Rhash) && (XLen >= Cyclist_Rhash)) {
-            size_t  lenProcessed = Cyclist_AbsorbHashFullBlocks(&instance->state, X, XLen);
-            X       += lenProcessed;
-            XLen    -= lenProcessed;
-        }
-        #endif
     } while ( XLen != 0 );
 }
 
@@ -156,19 +155,17 @@ static void Cyclist_SqueezeAny(Cyclist_Instance *instance, uint8_t *Y, size_t YL
     Y += len;
     YLen -= len;
     while (YLen != 0) {
-        #if defined(CyclistFullBlocks_supported)
-        if ((instance->mode == Cyclist_ModeKeyed) && (YLen >= Cyclist_Rkin)) {
+        if ((SnP_GetFeatures() & SnP_Feature_Cyclist) && (instance->mode == Cyclist_ModeKeyed) && (YLen >= Cyclist_Rkin)) {
             size_t  lenProcessed = Cyclist_SqueezeKeyedFullBlocks(&instance->state, Y, YLen);
             Y       += lenProcessed;
             YLen    -= lenProcessed;
         }
-        else if ((instance->mode == Cyclist_ModeHash) && (YLen >= Cyclist_Rhash)) {
+        else if ((SnP_GetFeatures() & SnP_Feature_Cyclist) && (instance->mode == Cyclist_ModeHash) && (YLen >= Cyclist_Rhash)) {
             size_t  lenProcessed = Cyclist_SqueezeHashFullBlocks(&instance->state, Y, YLen);
             Y       += lenProcessed;
             YLen    -= lenProcessed;
         }
         else
-        #endif
         {
             Cyclist_Down(instance, NULL, 0, 0);
             len = (unsigned int)MyMin(YLen, instance->Rsqueeze );
@@ -187,15 +184,13 @@ static void Cyclist_Crypt(Cyclist_Instance *instance, const uint8_t *I, uint8_t 
 
     do {
         if (decrypt != 0) {
-            #if defined(CyclistFullBlocks_supported)
-            if ((Cu == 0) && (IOLen >= Cyclist_Rkout)) {
+            if ((SnP_GetFeatures() & SnP_Feature_Cyclist) && (Cu == 0) && (IOLen >= Cyclist_Rkout)) {
                 size_t  lenProcessed = Cyclist_DecryptFullBlocks(&instance->state, I, O, IOLen);
                 I       += lenProcessed;
                 O       += lenProcessed;
                 IOLen   -= lenProcessed;
             }
             else
-            #endif
             {
                 splitLen = (unsigned int)MyMin(IOLen, Cyclist_Rkout); /* use Rkout instead of Rsqueeze, this function is only called in keyed mode */
                 Cyclist_Up(instance, NULL, 0, Cu); /* Up without extract */
@@ -207,15 +202,13 @@ static void Cyclist_Crypt(Cyclist_Instance *instance, const uint8_t *I, uint8_t 
             }
         }
         else {
-            #if defined(CyclistFullBlocks_supported)
-            if ((Cu == 0) && (IOLen >= Cyclist_Rkout)) {
+            if ((SnP_GetFeatures() & SnP_Feature_Cyclist) && (Cu == 0) && (IOLen >= Cyclist_Rkout)) {
                 size_t  lenProcessed = Cyclist_EncryptFullBlocks(&instance->state, I, O, IOLen);
                 I       += lenProcessed;
                 O       += lenProcessed;
                 IOLen   -= lenProcessed;
             }
             else
-            #endif
             {
                 splitLen = (unsigned int)MyMin(IOLen, Cyclist_Rkout); /* use Rkout instead of Rsqueeze, this function is only called in keyed mode */
                 memcpy(P, I, splitLen);
@@ -326,11 +319,9 @@ void Cyclist_Ratchet(Cyclist_Instance *instance)
 #undef Cyclist_Rkout
 #undef Cyclist_lRatchet
 
-#if defined(CyclistFullBlocks_supported)
 #undef Cyclist_AbsorbKeyedFullBlocks
 #undef Cyclist_AbsorbHashFullBlocks
 #undef Cyclist_SqueezeKeyedFullBlocks
 #undef Cyclist_SqueezeHashFullBlocks
 #undef Cyclist_EncryptFullBlocks
 #undef Cyclist_DecryptFullBlocks
-#endif

@@ -24,7 +24,8 @@ Please refer to SnP-documentation.h for more details.
 #include <stddef.h>
 #include <stdint.h>
 #include "align.h"
-#include "KeccakP-1600-XOP-config.h"
+#include "config.h"
+#include "SnP-common.h"
 
 typedef struct {
     ALIGN(16) uint64_t A[25];
@@ -32,7 +33,13 @@ typedef struct {
 
 typedef KeccakP1600_align128plain64_state KeccakP1600_state;
 
-#define KeccakP1600_implementation      "implementation optimized for XOP (" KeccakP1600_implementation_config ")"
+#ifndef KeccakP1600_XOP_implementation_config
+    #define KeccakP1600_XOP_implementation_config "default: all rounds unrolled"
+    #define KeccakP1600_XOP_fullUnrolling
+#endif
+
+#define KeccakP1600_GetImplementation()             ("implementation optimized for XOP (" KeccakP1600_XOP_implementation_config ")")
+#define KeccakP1600_GetFeatures()                   (SnP_Feature_Main)
 #define KeccakP1600_stateAlignment      16
 
 #define KeccakP1600_StaticInitialize()
@@ -46,5 +53,14 @@ void KeccakP1600_Permute_12rounds(KeccakP1600_align128plain64_state *state);
 void KeccakP1600_Permute_24rounds(KeccakP1600_align128plain64_state *state);
 void KeccakP1600_ExtractBytes(const KeccakP1600_align128plain64_state *state, unsigned char *data, unsigned int offset, unsigned int length);
 void KeccakP1600_ExtractAndAddBytes(const KeccakP1600_align128plain64_state *state, const unsigned char *input, unsigned char *output, unsigned int offset, unsigned int length);
+
+#define KeccakF1600_FastLoop_Absorb(...)                0
+#define KeccakP1600_12rounds_FastLoop_Absorb(...)       0
+#define KeccakP1600_ODDuplexingFastInOut(...)           0
+#define KeccakP1600_12rounds_ODDuplexingFastInOut(...)  0
+#define KeccakP1600_ODDuplexingFastOut(...)             0
+#define KeccakP1600_12rounds_ODDuplexingFastOut(...)    0
+#define KeccakP1600_ODDuplexingFastIn(...)              0
+#define KeccakP1600_12rounds_ODDuplexingFastIn(...)     0
 
 #endif

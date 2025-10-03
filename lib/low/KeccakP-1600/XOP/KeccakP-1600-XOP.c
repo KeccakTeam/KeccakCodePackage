@@ -28,10 +28,10 @@ Please refer to LowLevel.build for the exact list of other files it must be comb
 #include "KeccakP-1600-SnP.h"
 
 #include "align.h"
-#ifdef KeccakP1600_fullUnrolling
+#ifdef KeccakP1600_XOP_fullUnrolling
 #define FullUnrolling
 #else
-#define Unrolling KeccakP1600_unrolling
+#define Unrolling KeccakP1600_XOP_unrolling
 #endif
 #include "KeccakP-1600-unrolling.macros"
 #include "SnP-Relaned.h"
@@ -413,7 +413,7 @@ void KeccakP1600_Permute_Nrounds(KeccakP1600_align128plain64_state *state, unsig
 void KeccakP1600_Permute_12rounds(KeccakP1600_align128plain64_state *state)
 {
     declareABCDE
-    #ifndef KeccakP1600_fullUnrolling
+    #ifndef KeccakP1600_XOP_fullUnrolling
     unsigned int i;
     #endif
     uint64_t *stateAsLanes = state->A;
@@ -428,7 +428,7 @@ void KeccakP1600_Permute_12rounds(KeccakP1600_align128plain64_state *state)
 void KeccakP1600_Permute_24rounds(KeccakP1600_align128plain64_state *state)
 {
     declareABCDE
-    #ifndef KeccakP1600_fullUnrolling
+    #ifndef KeccakP1600_XOP_fullUnrolling
     unsigned int i;
     #endif
     uint64_t *stateAsLanes = state->A;

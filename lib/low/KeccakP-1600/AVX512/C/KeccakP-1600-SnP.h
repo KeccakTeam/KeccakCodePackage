@@ -23,7 +23,8 @@ Please refer to SnP-documentation.h for more details.
 
 #include <stddef.h>
 #include <stdint.h>
-#include "KeccakP-1600-AVX512-config.h"
+#include "config.h"
+#include "SnP-common.h"
 
 typedef struct {
     uint64_t A[25];
@@ -31,9 +32,13 @@ typedef struct {
 
 typedef KeccakP1600_plain64_state KeccakP1600_state;
 
-#define KeccakP1600_implementation      "AVX-512 optimized implementation (" KeccakP1600_implementation_config ")"
-#define KeccakF1600_FastLoop_supported
-#define KeccakP1600_12rounds_FastLoop_supported
+#define KeccakP1600_AVX512_implementation_config "12 rounds unrolled"
+#define KeccakP1600_AVX512_unrolling 12
+
+#define KeccakP1600_GetImplementation() \
+    ("AVX512 optimized implementation (" KeccakP1600_AVX512_implementation_config ")")
+#define KeccakP1600_GetFeatures() \
+    (SnP_Feature_Main | SnP_Feature_SpongeAbsorb)
 
 #define KeccakP1600_StaticInitialize()
 void KeccakP1600_Initialize(KeccakP1600_plain64_state *state);
@@ -48,5 +53,12 @@ void KeccakP1600_ExtractBytes(const KeccakP1600_plain64_state *state, unsigned c
 void KeccakP1600_ExtractAndAddBytes(const KeccakP1600_plain64_state *state, const unsigned char *input, unsigned char *output, unsigned int offset, unsigned int length);
 size_t KeccakF1600_FastLoop_Absorb(KeccakP1600_plain64_state *state, unsigned int laneCount, const unsigned char *data, size_t dataByteLen);
 size_t KeccakP1600_12rounds_FastLoop_Absorb(KeccakP1600_plain64_state *state, unsigned int laneCount, const unsigned char *data, size_t dataByteLen);
+
+#define KeccakP1600_ODDuplexingFastInOut(...)           0
+#define KeccakP1600_12rounds_ODDuplexingFastInOut(...)  0
+#define KeccakP1600_ODDuplexingFastOut(...)             0
+#define KeccakP1600_12rounds_ODDuplexingFastOut(...)    0
+#define KeccakP1600_ODDuplexingFastIn(...)              0
+#define KeccakP1600_12rounds_ODDuplexingFastIn(...)     0
 
 #endif

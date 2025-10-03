@@ -57,13 +57,13 @@ typedef enum
     #endif
 #elif defined(XKCP_has_Xoodootimes8)
     #define XoodooMaxParallellism   8
-    #define XoodooAlignment         32
+    #define XoodooAlignment         64
     #if defined(Xoodootimes8_FastXoofff_supported)
         #define    Xoofff_AddIs    Xooffftimes8_AddIs
     #endif
 #elif defined(XKCP_has_Xoodootimes4)
     #define XoodooMaxParallellism   4
-    #define XoodooAlignment         16
+    #define XoodooAlignment         64
     #if defined(Xoodootimes4_FastXoofff_supported)
         #define    Xoofff_AddIs    Xooffftimes4_AddIs
     #endif

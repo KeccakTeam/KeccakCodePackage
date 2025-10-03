@@ -19,6 +19,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
 
 #include <stddef.h>
 #include <stdint.h>
+#include "SnP-common.h"
 
 /** For the documentation, see SnP-documentation.h.
  */
@@ -29,8 +30,8 @@ typedef struct {
 
 typedef Xoodoo_plain8_state Xoodoo_state;
 
-#define Xoodoo_implementation      "AVR8 optimized implementation"
-#define Xoodoo_stateAlignment      1
+#define Xoodoo_GetImplementation()                  "AVR8 optimized implementation"
+#define Xoodoo_GetFeatures()                        (SnP_Feature_Main)
 #define Xoodoo_HasNround
 
 #define Xoodoo_StaticInitialize()
@@ -44,5 +45,16 @@ void Xoodoo_Permute_6rounds(Xoodoo_plain8_state *state);
 void Xoodoo_Permute_12rounds(Xoodoo_plain8_state *state);
 void Xoodoo_ExtractBytes(const Xoodoo_plain8_state *state, uint8_t *data, unsigned int offset, unsigned int length);
 void Xoodoo_ExtractAndAddBytes(const Xoodoo_plain8_state *state, const uint8_t *input, uint8_t *output, unsigned int offset, unsigned int length);
+
+#define Xoofff_AddIs(...)
+#define Xoofff_CompressFastLoop(...)                0
+#define Xoofff_ExpandFastLoop(...)                  0
+
+#define Xoodyak_AbsorbKeyedFullBlocks(...)          0
+#define Xoodyak_AbsorbHashFullBlocks(...)           0
+#define Xoodyak_SqueezeHashFullBlocks(...)          0
+#define Xoodyak_SqueezeKeyedFullBlocks(...)         0
+#define Xoodyak_EncryptFullBlocks(...)              0
+#define Xoodyak_DecryptFullBlocks(...)              0
 
 #endif

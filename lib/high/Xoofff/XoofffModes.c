@@ -28,13 +28,11 @@ http://creativecommons.org/publicdomain/zero/1.0/
 
 #define MyMin(a, b)     (((a) < (b)) ? (a) : (b))
 
-#if !defined(Xoodoo_FastXoofff_supported)
-
-void Xoofff_AddIs(unsigned char *output, const unsigned char *input, size_t bitLen);
-
-#else
-
+void Xoofff_AddIs_dispatch(unsigned char *output, const unsigned char *input, size_t bitLen);
+#ifdef Xoofff_AddIs
+#undef Xoofff_AddIs
 #endif
+#define Xoofff_AddIs Xoofff_AddIs_dispatch
 
 #if defined(DEBUG_DUMP)
 static void DUMP( const unsigned char * pText, const unsigned char * pData, unsigned int size )

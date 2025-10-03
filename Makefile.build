@@ -25,6 +25,8 @@ http://creativecommons.org/publicdomain/zero/1.0/
     <fragment name="common">
         <h>lib/common/align.h</h>
         <h>lib/common/brg_endian.h</h>
+        <h>lib/low/common/SnP-implementations.h</h>
+        <c>lib/low/common/SnP-implementations.c</c>
     </fragment>
 
     <!-- *** Utilities *** -->
@@ -145,18 +147,18 @@ http://creativecommons.org/publicdomain/zero/1.0/
     <fragment name="generic64lc" inherits="K1600-plain-64bits-lcua Xoodoo-plain-ua"/>
 
     <!-- Implementations selected for the processors that support the SSSE3 instruction set -->
-    <fragment name="SSSE3" inherits="K1600-plain-64bits-lcua K1600x2-SSSE3-u2 Xoodoo-SSE2 Xoodoox4-SSSE3"/>
+    <fragment name="SSSE3" inherits="K1600-plain-64bits-lcua K1600x2-SSSE3-u2 Xoodoo-SSSE3 Xoodoox4-SSSE3"/>
 
     <!-- Implementations selected for processors that support the AVX instruction set (e.g., Sandy Bridge microarchitectures) -->
-    <fragment name="AVX" inherits="K1600-plain-64bits-lcua-shld K1600x2-SSSE3-ua Xoodoo-SSE2 Xoodoox4-SSSE3">
+    <fragment name="AVX" inherits="K1600-plain-64bits-lcua-shld K1600x2-SSSE3-ua Xoodoo-SSSE3 Xoodoox4-SSSE3">
         <msvc>/arch:AVX</msvc>
     </fragment>
     <!-- Implementations selected for processors that support the XOP instruction set (e.g., Bulldozer microarchitecture) -->
-    <fragment name="XOP" inherits="K1600-XOP-ua K1600x2-XOP-ua Xoodoo-SSE2 Xoodoox4-SSSE3"/>
+    <fragment name="XOP" inherits="K1600-XOP-ua K1600x2-XOP-ua Xoodoo-SSSE3 Xoodoox4-SSSE3"/>
     <!-- Implementations selected for processors that support the AVX2 instruction set (e.g., Haswell and Skylake microarchitectures) -->
-    <fragment name="AVX2" inherits="K1600-AVX2 K1600x2-SSSE3-u2 K1600x4-AVX2-u12 Xoodoo-SSE2 Xoodoox4-SSSE3 Xoodoox8-AVX2"/>
+    <fragment name="AVX2" inherits="K1600-AVX2 K1600x2-SSSE3-u2 K1600x4-AVX2-u12 Xoodoo-SSSE3 Xoodoox4-SSSE3 Xoodoox8-AVX2"/>
     <!-- Same, but without the assembly file (for MS Visual Studio) -->
-    <fragment name="AVX2noAsm" inherits="K1600-plain-64bits-ua K1600x2-SSSE3-u2 K1600x4-AVX2-u12 Xoodoo-SSE2 Xoodoox4-SSSE3 Xoodoox8-AVX2">
+    <fragment name="AVX2noAsm" inherits="K1600-plain-64bits-ua K1600x2-SSSE3-u2 K1600x4-AVX2-u12 Xoodoo-SSSE3 Xoodoox4-SSSE3 Xoodoox8-AVX2">
         <msvc>/arch:AVX2</msvc>
     </fragment>
 

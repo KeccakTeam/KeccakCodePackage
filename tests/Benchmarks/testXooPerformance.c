@@ -269,15 +269,15 @@ void printXoofffPerformanceHeader( void )
 {
     printf("*** Xoofff ***\n");
     printf("Using Xoodoo implementations:\n");
-    printf("- \303\227\x31: " Xoodoo_implementation "\n");
+    printf("- \303\227\x31: %s\n", Xoodoo_GetImplementation());
     #if defined(XKCP_has_Xoodootimes4)
-    printf("- \303\2274: " Xoodootimes4_implementation "\n");
+    printf("- \303\2274: %s\n",  Xoodootimes4_GetImplementation());
     #endif
     #if defined(XKCP_has_Xoodootimes8)
-    printf("- \303\2278: " Xoodootimes8_implementation "\n");
+    printf("- \303\2278: %s\n",  Xoodootimes8_GetImplementation());
     #endif
     #if defined(XKCP_has_Xoodootimes16)
-    printf("- \303\22716: " Xoodootimes16_implementation "\n");
+    printf("- \303\22716: %s\n",  Xoodootimes16_GetImplementation());
     #endif
     printf("\n");
 }
@@ -573,7 +573,9 @@ void printXoodyakPerformanceHeader( void )
 {
     printf("*** Xoodyak ***\n");
     printf("Using Xoodoo implementations:\n");
-    printf("- \303\227\x31: " Xoodoo_implementation "\n");
+    printf("- \303\227\x31: %s\n", Xoodoo_GetImplementation());
+    if (Xoodoo_GetFeatures() & SnP_Feature_Cyclist)
+        printf("      + Xoodyak_*FullBlocks()\n");
     printf("\n");
 }
 
@@ -588,16 +590,19 @@ void testXooPerformance(void)
 {
 
 #ifdef XKCP_has_Xoodoo
-    Xoodoo_timingSnP("Xoodoo", Xoodoo_implementation);
+    Xoodoo_timingSnP("Xoodoo", Xoodoo_GetImplementation());
 #endif
 #if defined(XKCP_has_Xoodootimes4)
-    Xoodootimes4_timingPlSnP("Xoodoo\303\2274", Xoodootimes4_implementation);
+    if (Xoodootimes4_GetFeatures())
+        Xoodootimes4_timingPlSnP("Xoodoo\303\2274", Xoodootimes4_GetImplementation());
 #endif
 #if defined(XKCP_has_Xoodootimes8)
-    Xoodootimes8_timingPlSnP("Xoodoo\303\2278", Xoodootimes8_implementation);
+    if (Xoodootimes8_GetFeatures())
+        Xoodootimes8_timingPlSnP("Xoodoo\303\2278", Xoodootimes8_GetImplementation());
 #endif
 #if defined(XKCP_has_Xoodootimes16)
-    Xoodootimes16_timingPlSnP("Xoodoo\303\22716", Xoodootimes16_implementation);
+    if (Xoodootimes16_GetFeatures())
+        Xoodootimes16_timingPlSnP("Xoodoo\303\22716", Xoodootimes16_GetImplementation());
 #endif
 
 #ifdef XKCP_has_Xoofff

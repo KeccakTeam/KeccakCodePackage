@@ -367,29 +367,38 @@ int ParallelHash_Update(ParallelHash_Instance *phi, const BitSequence *input, Bi
         }
     }
 
-    #if defined(KeccakP1600times8_implementation)
-    #if defined(KeccakF1600times8_FastLoop_supported)
-    ParallelSpongeFastLoop( 8 )
-    #else
-    ParallelSpongeLoop( 8 )
-    #endif
-    #endif
+#ifdef XKCP_has_KeccakP1600times8
+    if (KeccakP1600times8_GetFeatures()) {
+        if (KeccakP1600times8_GetFeatures() & PlSnP_Feature_SpongeAbsorb) {
+            ParallelSpongeFastLoop( 8 )
+        }
+        else {
+            ParallelSpongeLoop( 8 )
+        }
+    }
+#endif
 
-    #if defined(KeccakP1600times4_implementation)
-    #if defined(KeccakF1600times4_FastLoop_supported)
-    ParallelSpongeFastLoop( 4 )
-    #else
-    ParallelSpongeLoop( 4 )
-    #endif
-    #endif
+#ifdef XKCP_has_KeccakP1600times4
+    if (KeccakP1600times4_GetFeatures()) {
+        if (KeccakP1600times4_GetFeatures() & PlSnP_Feature_SpongeAbsorb) {
+            ParallelSpongeFastLoop( 4 )
+        }
+        else {
+            ParallelSpongeLoop( 4 )
+        }
+    }
+#endif
 
-    #if defined(KeccakP1600times2_implementation)
-    #if defined(KeccakF1600times2_FastLoop_supported)
-    ParallelSpongeFastLoop( 2 )
-    #else
-    ParallelSpongeLoop( 2 )
-    #endif
-    #endif
+#ifdef XKCP_has_KeccakP1600times2
+    if (KeccakP1600times2_GetFeatures()) {
+        if (KeccakP1600times2_GetFeatures() & PlSnP_Feature_SpongeAbsorb) {
+            ParallelSpongeFastLoop( 2 )
+        }
+        else {
+            ParallelSpongeLoop( 2 )
+        }
+    }
+#endif
 
     while ( inputByteLen > 0 ) {
         size_t len = (inputByteLen < phi->blockLen) ? inputByteLen : phi->blockLen;

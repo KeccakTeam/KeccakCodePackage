@@ -116,9 +116,7 @@ void displayMeasurements1101001000(cycles_t *measurements, uint32_t *laneCounts,
     #define SnP_width 1600
     #define SnP_Permute KeccakP1600_Permute_24rounds
     #define SnP_Permute_12rounds KeccakP1600_Permute_12rounds
-    #if defined(KeccakF1600_FastLoop_supported)
-        #define SnP_FastLoop_Absorb KeccakF1600_FastLoop_Absorb
-    #endif
+    #define SnP_FastLoop_Absorb KeccakF1600_FastLoop_Absorb
         #include "timingSnP.inc"
     #undef prefix
     #undef SnP
@@ -152,7 +150,7 @@ void KeccakP800_gatherSnP_FastLoop_Absorb(cycles_t dtMin, cycles_t *measurements
 }
 #endif
 
-#ifdef KeccakF1600_FastLoop_supported
+#ifdef XKCP_has_KeccakP1600
 cycles_t KeccakP1600_measureSnP_FastLoop_Absorb(cycles_t dtMin, unsigned int laneCount, unsigned int blockCount);
 
 void KeccakP1600_gatherSnP_FastLoop_Absorb(cycles_t dtMin, cycles_t *measurements, uint32_t *laneCounts)
@@ -173,8 +171,6 @@ void KeccakP1600_gatherSnP_FastLoop_Absorb(cycles_t dtMin, cycles_t *measurement
     laneCounts[1] = 17;
     laneCounts[2] = 21;
 }
-#endif
-
 #ifdef XKCP_has_KeccakP200
 cycles_t KeccakP200_measureSnP_GenericLoop_Absorb(cycles_t dtMin, unsigned int laneCount, unsigned int blockCount);
 
@@ -237,7 +233,6 @@ unsigned int KeccakP800_gatherSnP_GenericLoop_Absorb(cycles_t dtMin, cycles_t *m
 }
 #endif
 
-#ifdef XKCP_has_KeccakP1600
 cycles_t KeccakP1600_measureSnP_GenericLoop_Absorb(cycles_t dtMin, unsigned int laneCount, unsigned int blockCount);
 
 unsigned int KeccakP1600_gatherSnP_GenericLoop_Absorb(cycles_t dtMin, cycles_t *measurements, uint32_t *laneCounts)
@@ -270,9 +265,8 @@ unsigned int KeccakP1600_gatherSnP_GenericLoop_Absorb(cycles_t dtMin, cycles_t *
     #define SnP_width                   1600
     #define PlSnP_PermuteAll            KeccakP1600times2_PermuteAll_24rounds
     #define PlSnP_PermuteAll_12rounds   KeccakP1600times2_PermuteAll_12rounds
-    #if defined(KeccakF1600times2_FastLoop_supported)
-        #define PlSnP_FastLoop_Absorb KeccakF1600times2_FastLoop_Absorb
-    #endif
+    #define PlSnP_FastLoop_Absorb KeccakF1600times2_FastLoop_Absorb
+    #define PlSnP_GetFeatures           KeccakP1600times2_GetFeatures
         #include "timingPlSnP.inc"
     #undef prefix
     #undef PlSnP
@@ -281,6 +275,7 @@ unsigned int KeccakP1600_gatherSnP_GenericLoop_Absorb(cycles_t dtMin, cycles_t *
     #undef PlSnP_PermuteAll
     #undef PlSnP_PermuteAll_12rounds
     #undef PlSnP_FastLoop_Absorb
+    #undef PlSnP_GetFeatures
 #endif
 
 #ifdef XKCP_has_KeccakP1600times4
@@ -292,9 +287,8 @@ unsigned int KeccakP1600_gatherSnP_GenericLoop_Absorb(cycles_t dtMin, cycles_t *
     #define SnP_width                   1600
     #define PlSnP_PermuteAll            KeccakP1600times4_PermuteAll_24rounds
     #define PlSnP_PermuteAll_12rounds   KeccakP1600times4_PermuteAll_12rounds
-    #if defined(KeccakF1600times4_FastLoop_supported)
-        #define PlSnP_FastLoop_Absorb KeccakF1600times4_FastLoop_Absorb
-    #endif
+    #define PlSnP_FastLoop_Absorb KeccakF1600times4_FastLoop_Absorb
+    #define PlSnP_GetFeatures           KeccakP1600times4_GetFeatures
         #include "timingPlSnP.inc"
     #undef prefix
     #undef PlSnP
@@ -303,6 +297,7 @@ unsigned int KeccakP1600_gatherSnP_GenericLoop_Absorb(cycles_t dtMin, cycles_t *
     #undef PlSnP_PermuteAll
     #undef PlSnP_PermuteAll_12rounds
     #undef PlSnP_FastLoop_Absorb
+    #undef PlSnP_GetFeatures
 #endif
 
 #ifdef XKCP_has_KeccakP1600times8
@@ -314,9 +309,8 @@ unsigned int KeccakP1600_gatherSnP_GenericLoop_Absorb(cycles_t dtMin, cycles_t *
     #define SnP_width                   1600
     #define PlSnP_PermuteAll            KeccakP1600times8_PermuteAll_24rounds
     #define PlSnP_PermuteAll_12rounds   KeccakP1600times8_PermuteAll_12rounds
-    #if defined(KeccakF1600times8_FastLoop_supported)
-        #define PlSnP_FastLoop_Absorb KeccakF1600times8_FastLoop_Absorb
-    #endif
+    #define PlSnP_FastLoop_Absorb KeccakF1600times8_FastLoop_Absorb
+    #define PlSnP_GetFeatures           KeccakP1600times8_GetFeatures
         #include "timingPlSnP.inc"
     #undef prefix
     #undef PlSnP
@@ -325,6 +319,7 @@ unsigned int KeccakP1600_gatherSnP_GenericLoop_Absorb(cycles_t dtMin, cycles_t *
     #undef PlSnP_PermuteAll
     #undef PlSnP_PermuteAll_12rounds
     #undef PlSnP_FastLoop_Absorb
+    #undef PlSnP_GetFeatures
 #endif
 
 #ifdef XKCP_has_Sponge_Keccak_width800
@@ -348,7 +343,7 @@ void KeccakWidth800_timing()
 
 void KeccakWidth1600_timing()
 {
-    cycles_t calibartion = KeccakWidth1600_start("Keccak sponge functions using Keccak-f[1600]", KeccakP1600_implementation);
+    cycles_t calibartion = KeccakWidth1600_start("Keccak sponge functions using Keccak-f[1600]", KeccakP1600_GetImplementation());
     KeccakWidth1600_timingRC(calibartion, 576, 1024);
     KeccakWidth1600_timingRC(calibartion, 832,  768);
     KeccakWidth1600_timingRC(calibartion, 1088, 512);
@@ -367,7 +362,7 @@ XKCP_DeclareSpongeFunctions(TurboSHAKE)
 
 void TurboSHAKE_timing()
 {
-    cycles_t calibartion = TurboSHAKE_start("TurboSHAKE", KeccakP1600_implementation);
+    cycles_t calibartion = TurboSHAKE_start("TurboSHAKE", KeccakP1600_GetImplementation());
     TurboSHAKE_timingRCx(calibartion, 1088, 512, "TurboSHAKE256      ");
     TurboSHAKE_timingRCx(calibartion, 1344, 256, "TurboSHAKE128      ");
     printf("\n\n");
@@ -382,102 +377,90 @@ void printParallelImplementations(
 )
 {
     #ifdef XKCP_has_KeccakP1600
-        printf("- \303\2271: " KeccakP1600_implementation "\n");
-    #if defined(KeccakF1600_FastLoop_supported)
-    if (useKeccakF1600timesN_FastLoop_Absorb)
-        printf("      + KeccakF1600_FastLoop_Absorb()\n");
+    if (KeccakP1600_GetFeatures()) {
+        printf("- \303\2271: %s\n", KeccakP1600_GetImplementation());
+        if (KeccakP1600_GetFeatures() & SnP_Feature_SpongeAbsorb) {
+            if (useKeccakF1600timesN_FastLoop_Absorb)
+                printf("      + KeccakF1600_FastLoop_Absorb()\n");
+            if (useKeccakP1600timesN_12rounds_FastLoop_Absorb)
+                printf("      + KeccakP1600_12rounds_FastLoop_Absorb()\n");
+        }
+    }
+    else
     #endif
-    #if defined(KeccakP1600_12rounds_FastLoop_supported)
-    if (useKeccakP1600timesN_12rounds_FastLoop_Absorb)
-        printf("      + KeccakP1600_12rounds_FastLoop_Absorb()\n");
-    #endif
-    #else
-    printf("- \303\2271: not used\n");
-    #endif
+        printf("- \303\2271: not used\n");
 
     #if defined(XKCP_has_KeccakP1600times2)
-    printf("- \303\2272: " KeccakP1600times2_implementation "\n");
-    #if defined(KeccakP1600times2_12rounds_FastLoop_supported)
-    if (useKeccakP1600timesN_12rounds_FastLoop_Absorb)
-        printf("      + KeccakP1600times2_12rounds_FastLoop_Absorb()\n");
-    #endif
-    #if defined(KeccakF1600times2_FastLoop_supported)
-    if (useKeccakF1600timesN_FastLoop_Absorb)
-        printf("      + KeccakF1600times2_FastLoop_Absorb()\n");
-    #endif
-    #if defined(KeccakF1600times2_FastKravatte_supported)
-    if (useKeccakF1600timesN_FastKravatte) {
-        printf("      + KeccakP1600times2_KravatteCompress()\n");
-        printf("      + KeccakP1600times2_KravatteExpand()\n");
+    if (KeccakP1600times2_GetFeatures()) {
+        printf("- \303\2272: %s\n", KeccakP1600times2_GetImplementation());
+        if (KeccakP1600times2_GetFeatures() & PlSnP_Feature_SpongeAbsorb) {
+            if (useKeccakP1600timesN_12rounds_FastLoop_Absorb)
+                printf("      + KeccakP1600times2_12rounds_FastLoop_Absorb()\n");
+            if (useKeccakF1600timesN_FastLoop_Absorb)
+                printf("      + KeccakF1600times2_FastLoop_Absorb()\n");
+        }
+        if (useKeccakF1600timesN_FastKravatte
+                && (KeccakP1600times2_GetFeatures() & PlSnP_Feature_Farfalle)) {
+            printf("      + KeccakP1600times2_KravatteCompress()\n");
+            printf("      + KeccakP1600times2_KravatteExpand()\n");
+        }
+        if (useKeccakP1600timesN_KangarooTwelveProcessLeaves
+                && (KeccakP1600times2_GetFeatures() & PlSnP_Feature_KangarooTwelve)) {
+            printf("      + KeccakP1600times2_KT128ProcessLeaves()\n");
+            printf("      + KeccakP1600times2_KT256ProcessLeaves()\n");
+        }
     }
+    else
     #endif
-    if (useKeccakP1600timesN_KangarooTwelveProcessLeaves) {
-    #if defined(KeccakP1600times2_KT128ProcessLeaves_supported)
-        printf("      + KeccakP1600times2_KT128ProcessLeaves()\n");
-    #endif
-    #if defined(KeccakP1600times2_KT256ProcessLeaves_supported)
-        printf("      + KeccakP1600times2_KT256ProcessLeaves()\n");
-    #endif
-    }
-    #else
-    printf("- \303\2272: not used\n");
-    #endif
+        printf("- \303\2272: not used\n");
 
     #if defined(XKCP_has_KeccakP1600times4)
-    printf("- \303\2274: " KeccakP1600times4_implementation "\n");
-    #if defined(KeccakP1600times4_12rounds_FastLoop_supported)
-    if (useKeccakP1600timesN_12rounds_FastLoop_Absorb)
-        printf("      + KeccakP1600times4_12rounds_FastLoop_Absorb()\n");
-    #endif
-    #if defined(KeccakF1600times4_FastLoop_supported)
-    if (useKeccakF1600timesN_FastLoop_Absorb)
-        printf("      + KeccakF1600times4_FastLoop_Absorb()\n");
-    #endif
-    #if defined(KeccakF1600times4_FastKravatte_supported)
-    if (useKeccakF1600timesN_FastKravatte) {
-        printf("      + KeccakP1600times4_KravatteCompress()\n");
-        printf("      + KeccakP1600times4_KravatteExpand()\n");
+    if (KeccakP1600times4_GetFeatures()) {
+        printf("- \303\2274: %s\n", KeccakP1600times4_GetImplementation());
+        if (KeccakP1600times4_GetFeatures() & PlSnP_Feature_SpongeAbsorb) {
+            if (useKeccakP1600timesN_12rounds_FastLoop_Absorb)
+                printf("      + KeccakP1600times4_12rounds_FastLoop_Absorb()\n");
+            if (useKeccakF1600timesN_FastLoop_Absorb)
+                printf("      + KeccakF1600times4_FastLoop_Absorb()\n");
+        }
+        if (useKeccakF1600timesN_FastKravatte
+                && (KeccakP1600times4_GetFeatures() & PlSnP_Feature_Farfalle)) {
+            printf("      + KeccakP1600times4_KravatteCompress()\n");
+            printf("      + KeccakP1600times4_KravatteExpand()\n");
+        }
+        if (useKeccakP1600timesN_KangarooTwelveProcessLeaves
+                && (KeccakP1600times4_GetFeatures() & PlSnP_Feature_KangarooTwelve)) {
+            printf("      + KeccakP1600times4_KT128ProcessLeaves()\n");
+            printf("      + KeccakP1600times4_KT256ProcessLeaves()\n");
+        }
     }
+    else
     #endif
-    if (useKeccakP1600timesN_KangarooTwelveProcessLeaves) {
-    #if defined(KeccakP1600times4_KT128ProcessLeaves_supported)
-        printf("      + KeccakP1600times4_KT128ProcessLeaves()\n");
-    #endif
-    #if defined(KeccakP1600times4_KT256ProcessLeaves_supported)
-        printf("      + KeccakP1600times4_KT256ProcessLeaves()\n");
-    #endif
-    }
-    #else
-    printf("- \303\2274: not used\n");
-    #endif
+        printf("- \303\2274: not used\n");
 
     #if defined(XKCP_has_KeccakP1600times8)
-    printf("- \303\2278: " KeccakP1600times8_implementation "\n");
-    #if defined(KeccakP1600times8_12rounds_FastLoop_supported)
-    if (useKeccakP1600timesN_12rounds_FastLoop_Absorb)
-        printf("      + KeccakP1600times8_12rounds_FastLoop_Absorb()\n");
-    #endif
-    #if defined(KeccakF1600times8_FastLoop_supported)
-    if (useKeccakF1600timesN_FastLoop_Absorb)
-        printf("      + KeccakF1600times8_FastLoop_Absorb()\n");
-    #endif
-    #if defined(KeccakF1600times8_FastKravatte_supported)
-    if (useKeccakF1600timesN_FastKravatte) {
-        printf("      + KeccakP1600times8_KravatteCompress()\n");
-        printf("      + KeccakP1600times8_KravatteExpand()\n");
+    if (KeccakP1600times8_GetFeatures()) {
+        printf("- \303\2278: %s\n", KeccakP1600times8_GetImplementation());
+        if (KeccakP1600times8_GetFeatures() & PlSnP_Feature_SpongeAbsorb) {
+            if (useKeccakP1600timesN_12rounds_FastLoop_Absorb)
+                printf("      + KeccakP1600times8_12rounds_FastLoop_Absorb()\n");
+            if (useKeccakF1600timesN_FastLoop_Absorb)
+                printf("      + KeccakF1600times8_FastLoop_Absorb()\n");
+        }
+        if (useKeccakF1600timesN_FastKravatte
+                && (KeccakP1600times8_GetFeatures() & PlSnP_Feature_Farfalle)) {
+            printf("      + KeccakP1600times8_KravatteCompress()\n");
+            printf("      + KeccakP1600times8_KravatteExpand()\n");
+        }
+        if (useKeccakP1600timesN_KangarooTwelveProcessLeaves
+                && (KeccakP1600times2_GetFeatures() & PlSnP_Feature_KangarooTwelve)) {
+            printf("      + KeccakP1600times8_KT128ProcessLeaves()\n");
+            printf("      + KeccakP1600times8_KT256ProcessLeaves()\n");
+        }
     }
+    else
     #endif
-    if (useKeccakP1600timesN_KangarooTwelveProcessLeaves) {
-    #if defined(KeccakP1600times8_KT128ProcessLeaves_supported)
-        printf("      + KeccakP1600times8_KT128ProcessLeaves()\n");
-    #endif
-    #if defined(KeccakP1600times8_KT256ProcessLeaves_supported)
-        printf("      + KeccakP1600times8_KT256ProcessLeaves()\n");
-    #endif
-    }
-    #else
-    printf("- \303\2278: not used\n");
-    #endif
+        printf("- \303\2278: not used\n");
 }
 
 #ifdef XKCP_has_SP800_185
@@ -1268,16 +1251,19 @@ void testPerformance()
 #endif
 
 #ifdef XKCP_has_KeccakP1600
-    KeccakP1600_timingSnP("Keccak-p[1600]", KeccakP1600_implementation);
+    KeccakP1600_timingSnP("Keccak-p[1600]", KeccakP1600_GetImplementation());
 #endif
 #ifdef XKCP_has_KeccakP1600times2
-    KeccakP1600times2_timingPlSnP("Keccak-p[1600]\303\2272", KeccakP1600times2_implementation);
+    if (KeccakP1600times2_GetFeatures())
+        KeccakP1600times2_timingPlSnP("Keccak-p[1600]\303\2272", KeccakP1600times2_GetImplementation());
 #endif
 #ifdef XKCP_has_KeccakP1600times4
-    KeccakP1600times4_timingPlSnP("Keccak-p[1600]\303\2274", KeccakP1600times4_implementation);
+    if (KeccakP1600times4_GetFeatures())
+        KeccakP1600times4_timingPlSnP("Keccak-p[1600]\303\2274", KeccakP1600times4_GetImplementation());
 #endif
 #ifdef XKCP_has_KeccakP1600times8
-    KeccakP1600times8_timingPlSnP("Keccak-p[1600]\303\2278", KeccakP1600times8_implementation);
+    if (KeccakP1600times8_GetFeatures())
+        KeccakP1600times8_timingPlSnP("Keccak-p[1600]\303\2278", KeccakP1600times8_GetImplementation());
 #endif
 
 #ifdef XKCP_has_Sponge_Keccak_width800

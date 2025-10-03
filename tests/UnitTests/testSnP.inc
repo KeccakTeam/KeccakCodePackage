@@ -29,6 +29,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #define SnP_state                       JOIN(SnP, _state)
 #define SnP_stateSizeInBytes            sizeof(SnP_state)
 #define SnP_laneLengthInBytes           ((SnP_width)/(8*SnP_laneCount))
+#define SnP_GetFeatures                  JOIN(SnP, _GetFeatures)
 #define SnP_StaticInitialize            JOIN(SnP, _StaticInitialize)
 #define SnP_Initialize                  JOIN(SnP, _Initialize)
 #define SnP_AddByte                     JOIN(SnP, _AddByte)
@@ -87,20 +88,25 @@ void dumpState(const unsigned char *state, char *message)
     #define DUMP( argS, argT )
 #endif
 
-#ifndef SnP_FastLoop_Absorb
-#define SnP_FastLoop_Absorb JOIN(SnP, _FastLoop_Absorb)
-size_t SnP_FastLoop_Absorb(SnP_state *state, unsigned int laneCount, const unsigned char *data, size_t dataByteLen)
+#ifndef SnP_NoFastLoopAbsorb
+#define SnP_FastLoop_Absorb_dispatch JOIN(SnP, _FastLoop_Absorb_dispatch)
+size_t SnP_FastLoop_Absorb_dispatch(SnP_state *state, unsigned int laneCount, const unsigned char *data, size_t dataByteLen)
 {
-    size_t processed = 0;
-
-    while(dataByteLen >= laneCount*SnP_laneLengthInBytes) {
-        SnP_AddBytes(state, data, 0, laneCount*SnP_laneLengthInBytes);
-        SnP_Permute(state);
-        data += laneCount*SnP_laneLengthInBytes;
-        dataByteLen -= laneCount*SnP_laneLengthInBytes;
-        processed += laneCount*SnP_laneLengthInBytes;
+    if (SnP_GetFeatures() & SnP_Feature_SpongeAbsorb) {
+        return SnP_FastLoop_Absorb(state, laneCount, data, dataByteLen);
     }
-    return processed;
+    else {
+        size_t processed = 0;
+
+        while(dataByteLen >= laneCount*SnP_laneLengthInBytes) {
+            SnP_AddBytes(state, data, 0, laneCount*SnP_laneLengthInBytes);
+            SnP_Permute(state);
+            data += laneCount*SnP_laneLengthInBytes;
+            dataByteLen -= laneCount*SnP_laneLengthInBytes;
+            processed += laneCount*SnP_laneLengthInBytes;
+        }
+        return processed;
+    }
 }
 #endif
 
@@ -122,7 +128,7 @@ void elementarySnPtest(void);
 
 void testSnP(const char *fileName, const char *synopsis, const unsigned char *expected)
 {
-    UT_startTest(synopsis, JOIN(SnP, _implementation));
+    UT_startTest(synopsis, JOIN(SnP, _GetImplementation()));
     elementarySnPtest();
     nominalSnPtest(fileName, synopsis, expected);
     UT_endTest();
@@ -329,6 +335,7 @@ void nominalSnPtest(const char *fileName, const char *synopsis, const unsigned c
 #undef SnP_state
 #undef SnP_stateSizeInBytes
 #undef SnP_laneLengthInBytes
+#undef SnP_GetFeatures
 #undef SnP_StaticInitialize
 #undef SnP_Initialize
 #undef SnP_AddByte
@@ -337,4 +344,3 @@ void nominalSnPtest(const char *fileName, const char *synopsis, const unsigned c
 #undef SnP_OverwriteWithZeroes
 #undef SnP_ExtractBytes
 #undef SnP_ExtractAndAddBytes
-#undef SnP_FastLoop_Absorb

@@ -82,9 +82,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
     #define SnP_state KeccakP1600_state
     #define SnP_width 1600
     #define SnP_Permute KeccakP1600_Permute_24rounds
-    #if defined(KeccakF1600_FastLoop_supported)
-        #define SnP_FastLoop_Absorb KeccakF1600_FastLoop_Absorb
-    #endif
+    #define SnP_FastLoop_Absorb KeccakF1600_FastLoop_Absorb
         #include "KeccakSponge.inc"
     #undef prefix
     #undef SnP

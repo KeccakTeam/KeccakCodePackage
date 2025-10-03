@@ -27,6 +27,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
 
 #define PlSnP_states                    JOIN(PlSnP, _states)
 #define SnP_laneLengthInBytes           ((SnP_width)/(8*SnP_laneCount))
+#define PlSnP_GetFeatures               JOIN(PlSnP, _GetFeatures)
 #define PlSnP_StaticInitialize          JOIN(PlSnP, _StaticInitialize)
 #define PlSnP_InitializeAll             JOIN(PlSnP, _InitializeAll)
 #define PlSnP_AddByte                   JOIN(PlSnP, _AddByte)
@@ -99,19 +100,24 @@ void dumpState( const PlSnP_states * state, char * message )
     #define DUMP( argS, argT )
 #endif
 
-#ifndef PlSnP_FastLoop_Absorb
-#define PlSnP_FastLoop_Absorb JOIN(PlSnP, _FastLoop_Absorb)
-size_t PlSnP_FastLoop_Absorb(PlSnP_states *states, unsigned int laneCount, unsigned int laneOffsetParallel, unsigned int laneOffsetSerial, unsigned char *data, size_t dataByteLen)
+#ifndef PlSnP_NoFastLoopAbsorb
+#define PlSnP_FastLoop_Absorb_dispatch JOIN(PlSnP, _FastLoop_Absorb_dispatch)
+size_t PlSnP_FastLoop_Absorb_dispatch(PlSnP_states *states, unsigned int laneCount, unsigned int laneOffsetParallel, unsigned int laneOffsetSerial, unsigned char *data, size_t dataByteLen)
 {
-    const unsigned char *dataStart = data;
-
-    while(dataByteLen >= (laneOffsetParallel*PlSnP_P - laneOffsetParallel + laneCount)*SnP_laneLengthInBytes) {
-        PlSnP_AddLanesAll(states, data, laneCount, laneOffsetParallel);
-        PlSnP_PermuteAll(states);
-        data += laneOffsetSerial*SnP_laneLengthInBytes;
-        dataByteLen -= laneOffsetSerial*SnP_laneLengthInBytes;
+    if (PlSnP_GetFeatures() & PlSnP_Feature_SpongeAbsorb) {
+        return PlSnP_FastLoop_Absorb(states, laneCount, laneOffsetParallel, laneOffsetSerial, data, dataByteLen);
     }
-    return data - dataStart;
+    else {
+        const unsigned char *dataStart = data;
+
+        while(dataByteLen >= (laneOffsetParallel*PlSnP_P - laneOffsetParallel + laneCount)*SnP_laneLengthInBytes) {
+            PlSnP_AddLanesAll(states, data, laneCount, laneOffsetParallel);
+            PlSnP_PermuteAll(states);
+            data += laneOffsetSerial*SnP_laneLengthInBytes;
+            dataByteLen -= laneOffsetSerial*SnP_laneLengthInBytes;
+        }
+        return data - dataStart;
+    }
 }
 #endif
 
@@ -133,7 +139,7 @@ void testPlSnP(const char *fileName, const char *synopsis, const unsigned char *
     PlSnP_states stateAccumulated;
     PlSnP_states stateTest;
 
-    UT_startTest(synopsis, JOIN(PlSnP, _implementation));
+    UT_startTest(synopsis, JOIN(PlSnP, _GetImplementation()));
 
     PlSnP_StaticInitialize();
 
@@ -425,7 +431,7 @@ void testPlSnP(const char *fileName, const char *synopsis, const unsigned char *
         unsigned char buffer[PlSnP_P*SnP_laneLengthInBytes*100+SnP_laneCount*SnP_laneLengthInBytes+8];
         unsigned i, blocks, extra, laneCount, alignment;
 
-        assert(PlSnP_FastLoop_Absorb(&stateTest, SnP_laneCount, SnP_laneCount, PlSnP_P*SnP_laneCount, buffer, (SnP_laneCount-1)*PlSnP_P) == 0);
+        assert(PlSnP_FastLoop_Absorb_dispatch(&stateTest, SnP_laneCount, SnP_laneCount, PlSnP_P*SnP_laneCount, buffer, (SnP_laneCount-1)*PlSnP_P) == 0);
         for(laneCount=1; laneCount<SnP_laneCount; laneCount++) {
             blocks = 100/laneCount;
             if (blocks > 20) blocks = 20;
@@ -434,9 +440,9 @@ void testPlSnP(const char *fileName, const char *synopsis, const unsigned char *
             assert(blocks*laneCount*PlSnP_P*SnP_laneLengthInBytes+extra+alignment <= sizeof(buffer));
             for(i=0; i<sizeof(buffer)-8; i++)
                 buffer[i+alignment] = 0xA0 - 17*i + 2*alignment - 4*laneCount;
-            assert(PlSnP_FastLoop_Absorb(&stateTest, laneCount, laneCount, PlSnP_P*laneCount, buffer+alignment, blocks*laneCount*PlSnP_P*SnP_laneLengthInBytes+extra)
+            assert(PlSnP_FastLoop_Absorb_dispatch(&stateTest, laneCount, laneCount, PlSnP_P*laneCount, buffer+alignment, blocks*laneCount*PlSnP_P*SnP_laneLengthInBytes+extra)
                 == blocks*laneCount*PlSnP_P*SnP_laneLengthInBytes);
-            assert(PlSnP_FastLoop_Absorb(&stateTest, laneCount, blocks*laneCount, laneCount, buffer+alignment, blocks*laneCount*PlSnP_P*SnP_laneLengthInBytes+extra)
+            assert(PlSnP_FastLoop_Absorb_dispatch(&stateTest, laneCount, blocks*laneCount, laneCount, buffer+alignment, blocks*laneCount*PlSnP_P*SnP_laneLengthInBytes+extra)
                 == blocks*laneCount*SnP_laneLengthInBytes);
         }
         accumulateStateParallel(&stateAccumulated, &stateTest);
@@ -482,6 +488,7 @@ void testPlSnP(const char *fileName, const char *synopsis, const unsigned char *
 #undef PlSnP_P
 #undef SnP_laneLengthInBytes
 #undef SnP_laneCount
+#undef PlSnP_GetFeatures
 #undef PlSnP_StaticInitialize
 #undef PlSnP_InitializeAll
 #undef PlSnP_AddByte
