@@ -18,9 +18,6 @@ http://creativecommons.org/publicdomain/zero/1.0/
   *
   * The following type and functions are not actually implemented. Their
   * documentation is generic, with the prefix Prefix replaced by
-  * - KeccakWidth200 for a duplex object based on Keccak-f[200]
-  * - KeccakWidth400 for a duplex object based on Keccak-f[400]
-  * - KeccakWidth800 for a duplex object based on Keccak-f[800]
   * - KeccakWidth1600 for a duplex object based on Keccak-f[1600]
   *
   * In all these functions, the rate and capacity must sum to the width of the

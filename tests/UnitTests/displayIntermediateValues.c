@@ -150,13 +150,7 @@ void displayStateAsLanes(int level, const char *text, void *statePointer, unsign
 {
     if (width == 1600)
         displayStateAs64bitLanes(level, text, statePointer);
-    if (width == 800)
-        displayStateAs32bitLanes(level, text, statePointer);
-    if (width == 400)
-        displayStateAs16bitLanes(level, text, statePointer);
-    if (width == 200)
-        displayStateAs8bitLanes(level, text, statePointer);
-}
+    }
 
 void displayRoundNumber(int level, unsigned int i)
 {

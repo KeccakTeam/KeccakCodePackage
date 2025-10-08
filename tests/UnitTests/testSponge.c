@@ -28,30 +28,6 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #define flavor_IUF_AllAtOnce    2
 #define flavor_IUF_Pieces       3
 
-#ifdef XKCP_has_Sponge_Keccak_width200
-    #define prefix KeccakWidth200
-    #define SnP_width 200
-    #include "testSponge.inc"
-    #undef prefix
-    #undef SnP_width
-#endif
-
-#ifdef XKCP_has_Sponge_Keccak_width400
-    #define prefix KeccakWidth400
-    #define SnP_width 400
-    #include "testSponge.inc"
-    #undef prefix
-    #undef SnP_width
-#endif
-
-#ifdef XKCP_has_Sponge_Keccak_width800
-    #define prefix KeccakWidth800
-    #define SnP_width 800
-    #include "testSponge.inc"
-    #undef prefix
-    #undef SnP_width
-#endif
-
 #ifdef XKCP_has_Sponge_Keccak_width1600
     #define prefix KeccakWidth1600
     #define SnP_width 1600
@@ -77,18 +53,6 @@ void writeTestSponge(void)
 
     f = fopen("TestSponge.txt", "w");
     assert(f != NULL);
-#ifdef XKCP_has_Sponge_Keccak_width200
-    for(rate = 8; rate <= 200; rate += 8)
-        KeccakWidth200_writeTestSponge(f, rate, 200-rate);
-#endif
-#ifdef XKCP_has_Sponge_Keccak_width400
-    for(rate = 16; rate <= 400; rate += (rate < 256) ? 16 : 8)
-        KeccakWidth400_writeTestSponge(f, rate, 400-rate);
-#endif
-#ifdef XKCP_has_Sponge_Keccak_width800
-    for(rate = 32; rate <= 800; rate += (rate < 512) ? 32 : ((rate < 672) ? 16 : 8))
-        KeccakWidth800_writeTestSponge(f, rate, 800-rate);
-#endif
 #ifdef XKCP_has_Sponge_Keccak_width1600
     for(rate = 64; rate <= 1600; rate += (rate < 1024) ? 64 : ((rate < 1344) ? 32 : 8))
         KeccakWidth1600_writeTestSponge(f, rate, 1600-rate);
@@ -103,21 +67,6 @@ void writeTestSponge(void)
 
 void selfTestSponge(unsigned int rate, unsigned int capacity, int flavor, const char *expected)
 {
-#ifdef XKCP_has_Sponge_Keccak_width200
-    if (rate+capacity == 200)
-        KeccakWidth200_selfTestSponge(rate, capacity, flavor, (const uint8_t*)expected);
-    else
-#endif
-#ifdef XKCP_has_Sponge_Keccak_width400
-    if (rate+capacity == 400)
-        KeccakWidth400_selfTestSponge(rate, capacity, flavor, (const uint8_t*)expected);
-    else
-#endif
-#ifdef XKCP_has_Sponge_Keccak_width800
-    if (rate+capacity == 800)
-        KeccakWidth800_selfTestSponge(rate, capacity, flavor, (const uint8_t*)expected);
-    else
-#endif
 #ifdef XKCP_has_Sponge_Keccak_width1600
     if (rate+capacity == 1600)
         KeccakWidth1600_selfTestSponge(rate, capacity, flavor, (const uint8_t*)expected);
@@ -150,119 +99,6 @@ void testSponge()
             flavorString = "Testing sponge with queue all at once";
         else if (flavor == flavor_IUF_Pieces)
             flavorString = "Testing sponge with queue in pieces";
-#endif
-#ifdef XKCP_has_Sponge_Keccak_width200
-    UT_startTest("Keccak with width 200", flavorString);
-    selfTestSponge(8, 192, flavor, "\x89\xa3\xbc\x59\xf1\x3d\xe6\x3c"); /* Keccak[r=8, c=192] */
-    selfTestSponge(16, 184, flavor, "\xff\xfe\xa7\x51\x25\x17\xaa\x83"); /* Keccak[r=16, c=184] */
-    selfTestSponge(24, 176, flavor, "\xbb\x95\x35\x88\xe7\xba\x72\x6b"); /* Keccak[r=24, c=176] */
-    selfTestSponge(32, 168, flavor, "\x1d\x34\xe6\xae\x6c\x31\xec\x93"); /* Keccak[r=32, c=168] */
-    selfTestSponge(40, 160, flavor, "\xf5\x3e\xbb\xfc\xb5\x0f\x56\xa3"); /* Keccak[r=40, c=160] */
-    selfTestSponge(48, 152, flavor, "\x93\x8f\x62\xfb\x50\x3d\x28\x0f"); /* Keccak[r=48, c=152] */
-    selfTestSponge(56, 144, flavor, "\xae\x7c\xc1\x74\x83\x4f\x15\x36"); /* Keccak[r=56, c=144] */
-    selfTestSponge(64, 136, flavor, "\x70\xc2\xa3\xcb\x7e\x56\x65\xc9"); /* Keccak[r=64, c=136] */
-    selfTestSponge(72, 128, flavor, "\x2d\xfe\x2f\x0a\x6e\xfa\x1f\x6a"); /* Keccak[r=72, c=128] */
-    selfTestSponge(80, 120, flavor, "\xe6\x42\x74\xe9\x19\xa3\x0e\x9d"); /* Keccak[r=80, c=120] */
-    selfTestSponge(88, 112, flavor, "\x29\xfc\x00\x85\x26\x54\xc1\x9d"); /* Keccak[r=88, c=112] */
-    selfTestSponge(96, 104, flavor, "\x79\xab\x63\x15\x82\x1c\x70\x40"); /* Keccak[r=96, c=104] */
-    selfTestSponge(104, 96, flavor, "\x9e\x8e\xbd\x9f\x33\x16\x80\xf8"); /* Keccak[r=104, c=96] */
-    selfTestSponge(112, 88, flavor, "\x96\x53\xe9\x49\x61\x33\x99\xba"); /* Keccak[r=112, c=88] */
-    selfTestSponge(120, 80, flavor, "\x58\xe7\x99\xb9\xa8\x1b\x82\xea"); /* Keccak[r=120, c=80] */
-    selfTestSponge(128, 72, flavor, "\x11\xb0\xe2\xd0\x5b\xc4\xa4\x6e"); /* Keccak[r=128, c=72] */
-    selfTestSponge(136, 64, flavor, "\x53\x35\xd0\x2c\x66\x6d\x6b\x4b"); /* Keccak[r=136, c=64] */
-    selfTestSponge(144, 56, flavor, "\x72\xde\xeb\x4f\x77\x8f\x02\x1e"); /* Keccak[r=144, c=56] */
-    selfTestSponge(152, 48, flavor, "\xfb\x99\xdd\xc4\x78\x7b\x0e\xd9"); /* Keccak[r=152, c=48] */
-    selfTestSponge(160, 40, flavor, "\x67\xbc\xeb\x90\x27\x5a\x04\x24"); /* Keccak[r=160, c=40] */
-    selfTestSponge(168, 32, flavor, "\xc2\x55\xbc\xf0\x13\x98\xf2\x84"); /* Keccak[r=168, c=32] */
-    selfTestSponge(176, 24, flavor, "\x82\x6c\xed\x43\xec\xf5\x40\xf9"); /* Keccak[r=176, c=24] */
-    selfTestSponge(184, 16, flavor, "\xae\x63\x9e\x64\x1b\x91\x14\x3a"); /* Keccak[r=184, c=16] */
-    selfTestSponge(192, 8, flavor, "\xfa\x99\x62\x44\x5e\xf3\xca\xed"); /* Keccak[r=192, c=8] */
-    selfTestSponge(200, 0, flavor, "\xeb\x35\x59\x76\xd0\x0c\x5b\x5e"); /* Keccak[r=200, c=0] */
-    UT_endTest();
-#endif
-#ifdef XKCP_has_Sponge_Keccak_width400
-    UT_startTest("Keccak with width 400", flavorString);
-    selfTestSponge(16, 384, flavor, "\xdb\xc2\x15\x03\x90\x30\xd6\xc6"); /* Keccak[r=16, c=384] */
-    selfTestSponge(32, 368, flavor, "\xae\x6d\x20\xdd\x20\x86\x91\xab"); /* Keccak[r=32, c=368] */
-    selfTestSponge(48, 352, flavor, "\xe2\x43\x83\x3f\x35\x89\xf4\xfb"); /* Keccak[r=48, c=352] */
-    selfTestSponge(64, 336, flavor, "\x4a\xa2\x20\x4e\xd5\xb9\x2d\xd0"); /* Keccak[r=64, c=336] */
-    selfTestSponge(80, 320, flavor, "\x82\x10\xcb\xbd\x71\x8c\x35\x64"); /* Keccak[r=80, c=320] */
-    selfTestSponge(96, 304, flavor, "\xc3\x46\xe4\x13\x0f\xbf\x38\x3e"); /* Keccak[r=96, c=304] */
-    selfTestSponge(112, 288, flavor, "\xf7\x4b\xa0\xa0\xb8\x75\x7c\x23"); /* Keccak[r=112, c=288] */
-    selfTestSponge(128, 272, flavor, "\x4c\xc2\x3f\x20\xc7\x1e\x7a\x41"); /* Keccak[r=128, c=272] */
-    selfTestSponge(144, 256, flavor, "\x69\x15\x6f\x45\xf4\x31\x0d\x50"); /* Keccak[r=144, c=256] */
-    selfTestSponge(160, 240, flavor, "\x41\xf9\xd7\xd6\xb6\x55\xf7\x92"); /* Keccak[r=160, c=240] */
-    selfTestSponge(176, 224, flavor, "\xc2\xcb\x35\xf6\xbd\x12\xa8\x4e"); /* Keccak[r=176, c=224] */
-    selfTestSponge(192, 208, flavor, "\x0f\x38\x1a\x5b\x2c\x07\xb9\x0e"); /* Keccak[r=192, c=208] */
-    selfTestSponge(208, 192, flavor, "\x93\xa0\x71\xe7\x15\x68\x1d\x0e"); /* Keccak[r=208, c=192] */
-    selfTestSponge(224, 176, flavor, "\x32\x0e\xb5\x52\x87\x8d\xbe\x76"); /* Keccak[r=224, c=176] */
-    selfTestSponge(240, 160, flavor, "\xc4\x79\x03\x53\xb6\x50\x37\x26"); /* Keccak[r=240, c=160] */
-    selfTestSponge(256, 144, flavor, "\x2a\x52\x54\xb9\x12\xad\x84\x33"); /* Keccak[r=256, c=144] */
-    selfTestSponge(264, 136, flavor, "\x98\xe0\x64\x69\xc1\x5c\x69\x82"); /* Keccak[r=264, c=136] */
-    selfTestSponge(272, 128, flavor, "\x4a\xe0\x64\xbe\x0f\x0d\xc2\x85"); /* Keccak[r=272, c=128] */
-    selfTestSponge(280, 120, flavor, "\xdb\x08\xce\x1a\xcd\x24\xc3\x33"); /* Keccak[r=280, c=120] */
-    selfTestSponge(288, 112, flavor, "\xcc\x78\x9a\x7e\xeb\x2c\xe2\x09"); /* Keccak[r=288, c=112] */
-    selfTestSponge(296, 104, flavor, "\xa5\x8f\xb3\x0f\x36\xa4\xdc\x75"); /* Keccak[r=296, c=104] */
-    selfTestSponge(304, 96, flavor, "\x2d\x88\xdd\x28\xca\xfb\xba\xa4"); /* Keccak[r=304, c=96] */
-    selfTestSponge(312, 88, flavor, "\x4e\x2c\x17\x38\xbe\x72\xb7\x28"); /* Keccak[r=312, c=88] */
-    selfTestSponge(320, 80, flavor, "\x30\x37\x4f\x8e\x81\xbb\xa6\x4b"); /* Keccak[r=320, c=80] */
-    selfTestSponge(328, 72, flavor, "\x12\x9c\x73\x40\x3b\xa6\xde\x79"); /* Keccak[r=328, c=72] */
-    selfTestSponge(336, 64, flavor, "\xe0\x94\xc1\x97\x50\x82\x59\x69"); /* Keccak[r=336, c=64] */
-    selfTestSponge(344, 56, flavor, "\xf4\x9b\x9e\xfa\x5d\x78\x4b\x97"); /* Keccak[r=344, c=56] */
-    selfTestSponge(352, 48, flavor, "\xe3\x87\x5d\x00\xcf\x47\x66\x37"); /* Keccak[r=352, c=48] */
-    selfTestSponge(360, 40, flavor, "\x50\x62\x4f\x90\x0e\x8a\xf6\x19"); /* Keccak[r=360, c=40] */
-    selfTestSponge(368, 32, flavor, "\x7d\x4a\x29\x92\x24\x57\x79\x4e"); /* Keccak[r=368, c=32] */
-    selfTestSponge(376, 24, flavor, "\x01\x7f\xc2\x43\x8c\x81\x47\x1f"); /* Keccak[r=376, c=24] */
-    selfTestSponge(384, 16, flavor, "\xe8\x03\x8a\x89\x64\x5d\x18\xbf"); /* Keccak[r=384, c=16] */
-    selfTestSponge(392, 8, flavor, "\xd5\xd4\x1d\x6e\x4e\x41\x60\x0e"); /* Keccak[r=392, c=8] */
-    selfTestSponge(400, 0, flavor, "\xe3\x77\x7e\x01\x55\xf6\xe7\xc5"); /* Keccak[r=400, c=0] */
-    UT_endTest();
-#endif
-#ifdef XKCP_has_Sponge_Keccak_width800
-    UT_startTest("Keccak with width 800", flavorString);
-    selfTestSponge(32, 768, flavor, "\xd6\x0a\x95\x77\xb8\x75\x75\xab"); /* Keccak[r=32, c=768] */
-    selfTestSponge(64, 736, flavor, "\xb7\xb8\xeb\xe0\x28\xa8\x73\xca"); /* Keccak[r=64, c=736] */
-    selfTestSponge(96, 704, flavor, "\x33\x42\x97\xb1\xa0\xe5\x67\x53"); /* Keccak[r=96, c=704] */
-    selfTestSponge(128, 672, flavor, "\x7b\x82\x9f\x68\x84\xfa\xc0\x6d"); /* Keccak[r=128, c=672] */
-    selfTestSponge(160, 640, flavor, "\x50\x75\x7a\x5b\xfb\x25\x3a\xa6"); /* Keccak[r=160, c=640] */
-    selfTestSponge(192, 608, flavor, "\x5f\xeb\x46\xa5\xb1\x9e\xfe\x4b"); /* Keccak[r=192, c=608] */
-    selfTestSponge(224, 576, flavor, "\x4f\x51\x7f\xa1\xd0\x2c\x9c\xa7"); /* Keccak[r=224, c=576] */
-    selfTestSponge(256, 544, flavor, "\xa3\xe5\x45\x32\x3e\xf9\x45\x1e"); /* Keccak[r=256, c=544] */
-    selfTestSponge(288, 512, flavor, "\x5d\x21\x41\xa9\xaa\x82\x4e\x6f"); /* Keccak[r=288, c=512] */
-    selfTestSponge(320, 480, flavor, "\x6e\xfe\x0d\x9f\x54\x25\x17\x5c"); /* Keccak[r=320, c=480] */
-    selfTestSponge(352, 448, flavor, "\xd9\xf0\x5c\x2a\x46\x8b\xde\x4e"); /* Keccak[r=352, c=448] */
-    selfTestSponge(384, 416, flavor, "\x3f\x77\x76\x51\x88\x47\x1a\x27"); /* Keccak[r=384, c=416] */
-    selfTestSponge(416, 384, flavor, "\x4c\x49\xa8\x0e\xe3\x85\x77\x7e"); /* Keccak[r=416, c=384] */
-    selfTestSponge(448, 352, flavor, "\x52\x4a\x09\x6d\x3d\xeb\x61\xef"); /* Keccak[r=448, c=352] */
-    selfTestSponge(480, 320, flavor, "\xc2\x5b\x87\x6a\xea\x03\xca\x33"); /* Keccak[r=480, c=320] */
-    selfTestSponge(512, 288, flavor, "\x9f\x00\x4b\xb5\x49\xa0\xab\xd9"); /* Keccak[r=512, c=288] */
-    selfTestSponge(528, 272, flavor, "\xa8\x52\x65\x82\x76\xeb\x4c\xd5"); /* Keccak[r=528, c=272] */
-    selfTestSponge(544, 256, flavor, "\xb3\xaa\x84\xe8\x8f\x90\x43\x7d"); /* Keccak[r=544, c=256] */
-    selfTestSponge(560, 240, flavor, "\xcd\xb2\xcd\xf7\x0f\x42\x2c\x48"); /* Keccak[r=560, c=240] */
-    selfTestSponge(576, 224, flavor, "\xcb\xf0\x5a\xc0\x03\x1e\xf7\xb4"); /* Keccak[r=576, c=224] */
-    selfTestSponge(592, 208, flavor, "\x68\x1a\x04\x17\xe0\x3b\x2f\x1b"); /* Keccak[r=592, c=208] */
-    selfTestSponge(608, 192, flavor, "\xc2\x5f\x72\x4c\x8d\xd4\x28\x83"); /* Keccak[r=608, c=192] */
-    selfTestSponge(624, 176, flavor, "\x73\x8f\xca\x50\xf8\x40\xa1\x98"); /* Keccak[r=624, c=176] */
-    selfTestSponge(640, 160, flavor, "\xfc\x2e\xa9\x00\x9f\xc5\xbb\x59"); /* Keccak[r=640, c=160] */
-    selfTestSponge(656, 144, flavor, "\x3d\x5f\x64\x0a\x33\x15\x05\xb9"); /* Keccak[r=656, c=144] */
-    selfTestSponge(672, 128, flavor, "\xc7\x66\x73\x3f\xf0\x11\xeb\xb7"); /* Keccak[r=672, c=128] */
-    selfTestSponge(680, 120, flavor, "\x73\x35\xcd\x7b\x6d\x08\x36\xfb"); /* Keccak[r=680, c=120] */
-    selfTestSponge(688, 112, flavor, "\xf9\x2e\x7b\x7c\xdf\x7b\x43\x8b"); /* Keccak[r=688, c=112] */
-    selfTestSponge(696, 104, flavor, "\x87\xd4\x69\x63\x7c\x28\xd7\xa1"); /* Keccak[r=696, c=104] */
-    selfTestSponge(704, 96, flavor, "\xe9\xa1\x6a\x01\x39\x36\x43\x8a"); /* Keccak[r=704, c=96] */
-    selfTestSponge(712, 88, flavor, "\x62\x99\xce\x37\xd7\x4b\x83\x60"); /* Keccak[r=712, c=88] */
-    selfTestSponge(720, 80, flavor, "\x3d\x9c\xd0\xc5\xd3\x10\x63\x67"); /* Keccak[r=720, c=80] */
-    selfTestSponge(728, 72, flavor, "\xd3\xa9\xaa\x2e\x7e\xaa\xb9\x4b"); /* Keccak[r=728, c=72] */
-    selfTestSponge(736, 64, flavor, "\xab\xf9\x25\x5f\x89\xe8\x5e\x67"); /* Keccak[r=736, c=64] */
-    selfTestSponge(744, 56, flavor, "\x46\xda\x48\xd3\xcf\x64\x2b\x21"); /* Keccak[r=744, c=56] */
-    selfTestSponge(752, 48, flavor, "\x7e\x63\x78\x25\xee\xdd\xe5\xf3"); /* Keccak[r=752, c=48] */
-    selfTestSponge(760, 40, flavor, "\x6d\x61\x95\x7f\x04\xdf\x2a\x62"); /* Keccak[r=760, c=40] */
-    selfTestSponge(768, 32, flavor, "\x5b\xc8\x43\x92\x15\x1f\x33\xcf"); /* Keccak[r=768, c=32] */
-    selfTestSponge(776, 24, flavor, "\x0e\xe0\x25\x01\xba\xca\xe6\xbe"); /* Keccak[r=776, c=24] */
-    selfTestSponge(784, 16, flavor, "\x2b\xfb\xb8\x66\x0f\xc0\xca\xd0"); /* Keccak[r=784, c=16] */
-    selfTestSponge(792, 8, flavor, "\x91\x09\x47\xe0\xe5\xc2\x83\xdd"); /* Keccak[r=792, c=8] */
-    selfTestSponge(800, 0, flavor, "\xa2\xff\x58\x44\x7a\x90\xbe\x06"); /* Keccak[r=800, c=0] */
-    UT_endTest();
 #endif
 #ifdef XKCP_has_Sponge_Keccak_width1600
     UT_startTest("Keccak with width 1600", flavorString);

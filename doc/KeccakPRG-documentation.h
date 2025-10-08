@@ -21,14 +21,10 @@ http://creativecommons.org/publicdomain/zero/1.0/
   * with Keccak. (https://keccak.team/files/SpongeDuplex.pdf)
   *
   * For the 128-bit security strength, we recommend SpongePRG on top of Keccak-f[1600]
-  * with a capacity of 254 bits. If a smaller footprint is required, we recommend
-  * SpongePRG on top of Keccak-f[800] again with a capacity of 254 bits.
+  * with a capacity of 254 bits.
   *
   * The following type and functions are not actually implemented. Their
   * documentation is generic, with the prefix Prefix replaced by
-  * - KeccakWidth200 for a SpongePRG object based on Keccak-f[200]
-  * - KeccakWidth400 for a SpongePRG object based on Keccak-f[400]
-  * - KeccakWidth800 for a SpongePRG object based on Keccak-f[800]
   * - KeccakWidth1600 for a SpongePRG object based on Keccak-f[1600]
   *
   * In all these functions, the rate and capacity must sum to the width of the
@@ -64,9 +60,6 @@ typedef struct Prefix_SpongePRG_InstanceStruct {
   * For instance, to initialize SpongePRG on top of Keccak-f[1600] with c=254 bits,
   * one should call KeccakWidth1600_SpongePRG_Initialize(&instance, 254) and
   * the block size is ρ=1344 bits or 168 bytes.
-  * Similarly, to initialize SpongePRG on top of Keccak-f[800] with c=254 bits,
-  * one should call KeccakWidth800_SpongePRG_Initialize(&instance, 254) and
-  * the block size is ρ=544 bits or 68 bytes.
   * @param  instance        Pointer to the SpongePRG instance to be initialized.
   * @param  capacity        Value of the capacity c (in bits).
   * @pre    0 ≤ @a capacity ≤ b-10, and otherwise the value of the capacity is unrestricted.

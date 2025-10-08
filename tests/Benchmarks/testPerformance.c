@@ -47,66 +47,6 @@ void displayMeasurements1101001000(cycles_t *measurements, uint32_t *laneCounts,
 #define xstr(s) str(s)
 #define str(s) #s
 
-#ifdef XKCP_has_KeccakP200
-    #include "KeccakP-200-SnP.h"
-
-    #define prefix KeccakP200
-    #define SnP KeccakP200
-    #define SnP_width 200
-    #define SnP_Permute KeccakP200_Permute_18rounds
-    #define SnP_Permute_Nrounds KeccakP200_Permute_Nrounds
-    #if defined(KeccakF200_FastLoop_supported)
-        #define SnP_FastLoop_Absorb KeccakF200_FastLoop_Absorb
-    #endif
-        #include "timingSnP.inc"
-    #undef prefix
-    #undef SnP
-    #undef SnP_width
-    #undef SnP_Permute
-    #undef SnP_Permute_Nrounds
-    #undef SnP_FastLoop_Absorb
-#endif
-
-#ifdef XKCP_has_KeccakP400
-    #include "KeccakP-400-SnP.h"
-
-    #define prefix KeccakP400
-    #define SnP KeccakP400
-    #define SnP_width 400
-    #define SnP_Permute KeccakP400_Permute_20rounds
-    #define SnP_Permute_Nrounds KeccakP400_Permute_Nrounds
-    #if defined(KeccakF400_FastLoop_supported)
-        #define SnP_FastLoop_Absorb KeccakF400_FastLoop_Absorb
-    #endif
-        #include "timingSnP.inc"
-    #undef prefix
-    #undef SnP
-    #undef SnP_width
-    #undef SnP_Permute
-    #undef SnP_Permute_Nrounds
-    #undef SnP_FastLoop_Absorb
-#endif
-
-#ifdef XKCP_has_KeccakP800
-    #include "KeccakP-800-SnP.h"
-
-    #define prefix KeccakP800
-    #define SnP KeccakP800
-    #define SnP_width 800
-    #define SnP_Permute KeccakP800_Permute_22rounds
-    #define SnP_Permute_12rounds KeccakP800_Permute_12rounds
-    #if defined(KeccakF800_FastLoop_supported)
-        #define SnP_FastLoop_Absorb KeccakF800_FastLoop_Absorb
-    #endif
-        #include "timingSnP.inc"
-    #undef prefix
-    #undef SnP
-    #undef SnP_width
-    #undef SnP_Permute
-    #undef SnP_Permute_12rounds
-    #undef SnP_FastLoop_Absorb
-#endif
-
 #ifdef XKCP_has_KeccakP1600
     #include "KeccakP-1600-SnP.h"
 
@@ -125,29 +65,6 @@ void displayMeasurements1101001000(cycles_t *measurements, uint32_t *laneCounts,
     #undef SnP_Permute
     #undef SnP_Permute_12rounds
     #undef SnP_FastLoop_Absorb
-#endif
-
-#ifdef KeccakF800_FastLoop_supported
-cycles_t KeccakP800_measureSnP_FastLoop_Absorb(cycles_t dtMin, unsigned int laneCount, unsigned int blockCount);
-
-void KeccakP800_gatherSnP_FastLoop_Absorb(cycles_t dtMin, cycles_t *measurements, uint32_t *laneCounts)
-{
-    measurements[ 0] = KeccakP800_measureSnP_FastLoop_Absorb(dtMin, 16, 1);
-    measurements[ 1] = KeccakP800_measureSnP_FastLoop_Absorb(dtMin, 16, 10);
-    measurements[ 2] = KeccakP800_measureSnP_FastLoop_Absorb(dtMin, 16, 100);
-    measurements[ 3] = KeccakP800_measureSnP_FastLoop_Absorb(dtMin, 16, 1000);
-    measurements[ 4] = KeccakP800_measureSnP_FastLoop_Absorb(dtMin, 17, 1);
-    measurements[ 5] = KeccakP800_measureSnP_FastLoop_Absorb(dtMin, 17, 10);
-    measurements[ 6] = KeccakP800_measureSnP_FastLoop_Absorb(dtMin, 17, 100);
-    measurements[ 7] = KeccakP800_measureSnP_FastLoop_Absorb(dtMin, 17, 1000);
-    measurements[ 8] = KeccakP800_measureSnP_FastLoop_Absorb(dtMin, 19, 1);
-    measurements[ 9] = KeccakP800_measureSnP_FastLoop_Absorb(dtMin, 19, 10);
-    measurements[10] = KeccakP800_measureSnP_FastLoop_Absorb(dtMin, 19, 100);
-    measurements[11] = KeccakP800_measureSnP_FastLoop_Absorb(dtMin, 19, 1000);
-    laneCounts[0] = 16;
-    laneCounts[1] = 17;
-    laneCounts[2] = 19;
-}
 #endif
 
 #ifdef XKCP_has_KeccakP1600
@@ -171,67 +88,6 @@ void KeccakP1600_gatherSnP_FastLoop_Absorb(cycles_t dtMin, cycles_t *measurement
     laneCounts[1] = 17;
     laneCounts[2] = 21;
 }
-#ifdef XKCP_has_KeccakP200
-cycles_t KeccakP200_measureSnP_GenericLoop_Absorb(cycles_t dtMin, unsigned int laneCount, unsigned int blockCount);
-
-unsigned int KeccakP200_gatherSnP_GenericLoop_Absorb(cycles_t dtMin, cycles_t *measurements, uint32_t *laneCounts)
-{
-    measurements[ 0] = KeccakP200_measureSnP_GenericLoop_Absorb(dtMin,  5, 1);
-    measurements[ 1] = KeccakP200_measureSnP_GenericLoop_Absorb(dtMin,  5, 10);
-    measurements[ 2] = KeccakP200_measureSnP_GenericLoop_Absorb(dtMin,  5, 100);
-    measurements[ 3] = KeccakP200_measureSnP_GenericLoop_Absorb(dtMin,  5, 1000);
-    laneCounts[0] =  5;
-    return 1;
-}
-#endif
-
-#ifdef XKCP_has_KeccakP400
-cycles_t KeccakP400_measureSnP_GenericLoop_Absorb(cycles_t dtMin, unsigned int laneCount, unsigned int blockCount);
-
-unsigned int KeccakP400_gatherSnP_GenericLoop_Absorb(cycles_t dtMin, cycles_t *measurements, uint32_t *laneCounts)
-{
-    measurements[ 0] = KeccakP400_measureSnP_GenericLoop_Absorb(dtMin,  9, 1);
-    measurements[ 1] = KeccakP400_measureSnP_GenericLoop_Absorb(dtMin,  9, 10);
-    measurements[ 2] = KeccakP400_measureSnP_GenericLoop_Absorb(dtMin,  9, 100);
-    measurements[ 3] = KeccakP400_measureSnP_GenericLoop_Absorb(dtMin,  9, 1000);
-    measurements[ 4] = KeccakP400_measureSnP_GenericLoop_Absorb(dtMin, 13, 1);
-    measurements[ 5] = KeccakP400_measureSnP_GenericLoop_Absorb(dtMin, 13, 10);
-    measurements[ 6] = KeccakP400_measureSnP_GenericLoop_Absorb(dtMin, 13, 100);
-    measurements[ 7] = KeccakP400_measureSnP_GenericLoop_Absorb(dtMin, 13, 1000);
-    measurements[ 8] = KeccakP400_measureSnP_GenericLoop_Absorb(dtMin, 15, 1);
-    measurements[ 9] = KeccakP400_measureSnP_GenericLoop_Absorb(dtMin, 15, 10);
-    measurements[10] = KeccakP400_measureSnP_GenericLoop_Absorb(dtMin, 15, 100);
-    measurements[11] = KeccakP400_measureSnP_GenericLoop_Absorb(dtMin, 15, 1000);
-    laneCounts[0] =  9;
-    laneCounts[1] = 13;
-    laneCounts[2] = 15;
-    return 3;
-}
-#endif
-
-#ifdef XKCP_has_KeccakP800
-cycles_t KeccakP800_measureSnP_GenericLoop_Absorb(cycles_t dtMin, unsigned int laneCount, unsigned int blockCount);
-
-unsigned int KeccakP800_gatherSnP_GenericLoop_Absorb(cycles_t dtMin, cycles_t *measurements, uint32_t *laneCounts)
-{
-    measurements[ 0] = KeccakP800_measureSnP_GenericLoop_Absorb(dtMin, 16, 1);
-    measurements[ 1] = KeccakP800_measureSnP_GenericLoop_Absorb(dtMin, 16, 10);
-    measurements[ 2] = KeccakP800_measureSnP_GenericLoop_Absorb(dtMin, 16, 100);
-    measurements[ 3] = KeccakP800_measureSnP_GenericLoop_Absorb(dtMin, 16, 1000);
-    measurements[ 4] = KeccakP800_measureSnP_GenericLoop_Absorb(dtMin, 17, 1);
-    measurements[ 5] = KeccakP800_measureSnP_GenericLoop_Absorb(dtMin, 17, 10);
-    measurements[ 6] = KeccakP800_measureSnP_GenericLoop_Absorb(dtMin, 17, 100);
-    measurements[ 7] = KeccakP800_measureSnP_GenericLoop_Absorb(dtMin, 17, 1000);
-    measurements[ 8] = KeccakP800_measureSnP_GenericLoop_Absorb(dtMin, 19, 1);
-    measurements[ 9] = KeccakP800_measureSnP_GenericLoop_Absorb(dtMin, 19, 10);
-    measurements[10] = KeccakP800_measureSnP_GenericLoop_Absorb(dtMin, 19, 100);
-    measurements[11] = KeccakP800_measureSnP_GenericLoop_Absorb(dtMin, 19, 1000);
-    laneCounts[0] = 16;
-    laneCounts[1] = 17;
-    laneCounts[2] = 19;
-    return 3;
-}
-#endif
 
 cycles_t KeccakP1600_measureSnP_GenericLoop_Absorb(cycles_t dtMin, unsigned int laneCount, unsigned int blockCount);
 
@@ -320,20 +176,6 @@ unsigned int KeccakP1600_gatherSnP_GenericLoop_Absorb(cycles_t dtMin, cycles_t *
     #undef PlSnP_PermuteAll_12rounds
     #undef PlSnP_FastLoop_Absorb
     #undef PlSnP_GetFeatures
-#endif
-
-#ifdef XKCP_has_Sponge_Keccak_width800
-    #define prefix      KeccakWidth800
-        #include "timingSponge.inc"
-    #undef prefix
-
-void KeccakWidth800_timing()
-{
-    cycles_t calibartion = KeccakWidth800_start("Keccak sponge functions using Keccak-f[800]", KeccakP800_implementation);
-    KeccakWidth800_timingRC(calibartion, 544, 256);
-    KeccakWidth800_timingRC(calibartion, 608, 192);
-    printf("\n\n");
-}
 #endif
 
 #ifdef XKCP_has_Sponge_Keccak_width1600
@@ -1238,18 +1080,6 @@ void testShakingUpAEPerformance( void )
 
 void testPerformance()
 {
-#ifdef XKCP_has_KeccakP200
-    KeccakP200_timingSnP("Keccak-p[200]", KeccakP200_implementation);
-#endif
-
-#ifdef XKCP_has_KeccakP400
-    KeccakP400_timingSnP("Keccak-p[400]", KeccakP400_implementation);
-#endif
-
-#ifdef XKCP_has_KeccakP800
-    KeccakP800_timingSnP("Keccak-p[800]", KeccakP800_implementation);
-#endif
-
 #ifdef XKCP_has_KeccakP1600
     KeccakP1600_timingSnP("Keccak-p[1600]", KeccakP1600_GetImplementation());
 #endif
@@ -1266,9 +1096,6 @@ void testPerformance()
         KeccakP1600times8_timingPlSnP("Keccak-p[1600]\303\2278", KeccakP1600times8_GetImplementation());
 #endif
 
-#ifdef XKCP_has_Sponge_Keccak_width800
-    KeccakWidth800_timing();
-#endif
 #ifdef XKCP_has_Sponge_Keccak_width1600
     KeccakWidth1600_timing();
 #endif
