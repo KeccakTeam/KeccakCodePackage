@@ -445,7 +445,7 @@ KeccakP1600_ExtractBytes_Exit:
 
 @ ----------------------------------------------------------------------------
 @
-@  void KeccakP800_ExtractAndAddBytes(void *state, const unsigned char *input, unsigned char *output, unsigned int offset, unsigned int length)
+@  void KeccakP1600_ExtractAndAddBytes(void *state, const unsigned char *input, unsigned char *output, unsigned int offset, unsigned int length)
 @
 .align 8
 .global   KeccakP1600_ExtractAndAddBytes
