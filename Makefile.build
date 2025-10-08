@@ -169,6 +169,9 @@ http://creativecommons.org/publicdomain/zero/1.0/
         <msvc>/arch:AVX512</msvc>
     </fragment>
 
+    <!-- Dispatcher over implementations selected for x86_64 platforms -->
+    <fragment name="x86-64" inherits="K1600-x86-64 Xoodoo-x86-64"/>
+
     <!-- Implementations selected for ARMv6 -->
     <fragment name="ARMv6" inherits="K1600-ARMv6M-u2 Xoodoo-ARMv6"/>
     <!-- Implementations selected for ARMv6M -->
@@ -187,7 +190,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
     <!-- Target names are of the form x/y where x is taken from the first set and y from the second set. -->
     <group all="XKCP">
         <product delimiter="/">
-            <factor set="reference reference32bits compact generic32 generic32lc generic64 generic64lc SSSE3 AVX XOP AVX2 AVX2noAsm AVX512 AVX512noAsm ARMv6 ARMv6M ARMv7M ARMv7A ARMv8A AVR8"/>
+            <factor set="reference reference32bits compact generic32 generic32lc generic64 generic64lc SSSE3 AVX XOP AVX2 AVX2noAsm AVX512 AVX512noAsm x86-64 ARMv6 ARMv6M ARMv7M ARMv7A ARMv8A AVR8"/>
             <factor set="UnitTests Benchmarks KeccakSum libXKCP.a libXKCP.so libXKCP.dylib"/>
         </product>
     </group>

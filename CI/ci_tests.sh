@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
+set -o pipefail
 
 # Create the artifacts folder
 mkdir -p artifacts/
@@ -31,31 +32,31 @@ echo "===========================================" | tee -a artifacts/CIlog.log
 ## of either endianness issues (missing macros) or alignment issues (see issue #124).
 if [ "$OTHER_PLATFORMS" = "1" ]; then
 	# Non-x86 and non-ARM platforms little endian platforms (big endian not supported yet for all the functions in XKCP)
-	echo "\n\n\n=========== Switching to cross-compilation of generic impletation on non-x86 and non-ARM platforms\n\n\n" | tee -a artifacts/CIlog.log
+	printf "\n\n\n=========== Switching to cross-compilation of generic impletation on non-x86 and non-ARM platforms\n\n\n" | tee -a artifacts/CIlog.log
 	for t in generic32 generic32lc generic64 generic64lc; do
 		for c in mips-linux-gnu-gcc mipsel-linux-gnu-gcc sparc64-linux-gnu-gcc mips64-linux-gnuabi64-gcc mips64el-linux-gnuabi64-gcc riscv64-linux-gnu-gcc; do
 		arch=`echo -n $c | cut -d'-' -f1`
-		echo "\n\n\n=========== Compiling with $t with $c compiler for architecture $arch\n\n\n" | tee -a artifacts/CIlog.log
-		make clean && CC=$c NO_FLAGS_NATIVE=1 EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc`
+		printf "\n\n\n=========== Compiling with $t with $c compiler for architecture $arch\n\n\n" | tee -a artifacts/CIlog.log
+		make clean && CC=$c NO_FLAGS_NATIVE=1 EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc` 2>&1 | tee -a artifacts/CIlog.log
 		cp ./bin/$t/UnitTests artifacts/UnitTests_"$t"_"$c"
-		echo "\n\n\n=========== Testing $t (compiled with $c compiler) for architecture $arch\n\n\n" | tee -a artifacts/CIlog.log
-		qemu-$arch-static ./bin/$t/UnitTests -p
+		printf "\n\n\n=========== Testing $t (compiled with $c compiler) for architecture $arch\n\n\n" | tee -a artifacts/CIlog.log
+		qemu-$arch-static ./bin/$t/UnitTests -p | tee -a artifacts/CIlog.log
 		done
 	done
 else
-	echo "\n\n\nSkipping non-x86 and non-ARM platforms, as OTHER_PLATFORMS has not been defined ...\n\n\n"
+	printf "\n\n\nSkipping non-x86 and non-ARM platforms, as OTHER_PLATFORMS has not been defined ...\n\n\n"
 fi
 
 ## x86_64 targets using the local host compiler (gcc or clang)
-for t in generic32 generic32lc generic64 generic64lc SSSE3 AVX AVX2 AVX2noAsm AVX512 AVX512noAsm; do
+for t in x86-64 compact generic32 generic32lc generic64 generic64lc SSSE3 AVX AVX2 AVX2noAsm AVX512 AVX512noAsm; do
 	for c in x86_64-linux-gnu-gcc x86_64-w64-mingw32-gcc gcc clang; do
-		echo "=========== Compiling $t (with $c compiler)\n\n\n" | tee -a artifacts/CIlog.log
-		make clean && CC=$c make $t/UnitTests -j`nproc`
+		printf "=========== Compiling $t (with $c compiler)\n\n\n" | tee -a artifacts/CIlog.log
+		make clean && CC=$c make $t/UnitTests -j`nproc` 2>&1 | tee -a artifacts/CIlog.log
 		if echo "$c" | grep -q "mingw"; then
 			cp ./bin/$t/UnitTests.exe artifacts/UnitTests_"$t"_"$c".exe
 			WINEOK="NOK"
 			# NOTE: for mingw targets, it is complicated to emulate non generic instruction set on any CPU
-			# Hence, we check that we are 
+			# Hence, we check that we are
 			if echo "$t" | grep -q "generic"; then
 				# For generic targets, we mainly check that this is a x86_64 platform for the
 				# x86 compilers
@@ -88,31 +89,31 @@ for t in generic32 generic32lc generic64 generic64lc SSSE3 AVX AVX2 AVX2noAsm AV
 				fi
 			fi
 			if [ "$WINEOK" = "OK" ]; then
-				echo "\n\n\n=========== Testing $t (compiled with $c compiler) for x86_64 windows\n\n\n" | tee -a artifacts/CIlog.log
-				echo "============== (emulating with wine, native CPU support checked)" | tee -a artifacts/CIlog.log
-				wine ./bin/$t/UnitTests.exe -p
+				printf "\n\n\n=========== Testing $t (compiled with $c compiler) for x86_64 windows\n\n\n" | tee -a artifacts/CIlog.log
+				printf "============== (emulating with wine, native CPU support checked)" | tee -a artifacts/CIlog.log
+				wine ./bin/$t/UnitTests.exe -p | tee -a artifacts/CIlog.log
 			else
-				echo "\n\n\n=========== Skipping run test with wine for $t (compiled with $c compiler): AVX512 not supported by the native CI CPU\n\n\n" | tee -a artifacts/CIlog.log
+				printf "\n\n\n=========== Skipping run test with wine for $t (compiled with $c compiler): AVX512 not supported by the native CI CPU\n\n\n" | tee -a artifacts/CIlog.log
 			fi
 		else
 			cp ./bin/$t/UnitTests artifacts/UnitTests_"$t"_"$c"
 			if echo "$t" | grep -q "AVX512"; then
 				# NOTE: AVX512 is not supported by Qemu as of now, so dynamically check if the native CPU supports it or not
 				if [ "$AVX512VL" != "" ] && [ "$AVX512F" != "" ]; then
-					echo "\n\n\n=========== Testing $t (compiled with $c compiler) for x86_64 (native test as AVX512 is not supported yet by Qemu)\n\n\n" | tee -a artifacts/CIlog.log
-					./bin/$t/UnitTests -p
+					printf "\n\n\n=========== Testing $t (compiled with $c compiler) for x86_64 (native test as AVX512 is not supported yet by Qemu)\n\n\n" | tee -a artifacts/CIlog.log
+					./bin/$t/UnitTests -p | tee -a artifacts/CIlog.log
 				else
-					echo "\n\n\n=========== Skipping run test for $t (compiled with $c compiler): AVX512 not supported yet by Qemu and not supported by the native CI CPU\n\n\n" | tee -a artifacts/CIlog.log
+					printf "\n\n\n=========== Skipping run test for $t (compiled with $c compiler): AVX512 not supported yet by Qemu and not supported by the native CI CPU\n\n\n" | tee -a artifacts/CIlog.log
 				fi
 			else
 				if [ "$AVX512VL" != "" ] && [ "$AVX512F" != "" ]; then
 					# Since the -march=native / -mtune=native toggles are used, we cannot rely on Qemu on
 					# CPUs that support AVX512. Hence we execute the test natively
-					echo "\n\n\n=========== Testing $t (compiled with $c compiler) for x86_64 (native test as AVX512 is not supported yet by Qemu)\n\n\n" | tee -a artifacts/CIlog.log
-                                        ./bin/$t/UnitTests -p
+					printf "\n\n\n=========== Testing $t (compiled with $c compiler) for x86_64 (native test as AVX512 is not supported yet by Qemu)\n\n\n" | tee -a artifacts/CIlog.log
+                                        ./bin/$t/UnitTests -p | tee -a artifacts/CIlog.log
 				else
-					echo "\n\n\n=========== Testing $t (compiled with $c compiler) for x86_64\n\n\n" | tee -a artifacts/CIlog.log
-                                        qemu-x86_64-static ./bin/$t/UnitTests -p
+					printf "\n\n\n=========== Testing $t (compiled with $c compiler) for x86_64\n\n\n" | tee -a artifacts/CIlog.log
+                                        qemu-x86_64-static ./bin/$t/UnitTests -p | tee -a artifacts/CIlog.log
 				fi
 			fi
 		fi
@@ -122,8 +123,8 @@ done
 ## x86 32 bits targets on generic implementations
 for t in generic32 generic32lc generic64 generic64lc; do
 	for c in i686-linux-gnu-gcc i686-w64-mingw32-gcc; do
-		echo "=========== Compiling $t (with $c compiler)\n\n\n" | tee -a artifacts/CIlog.log
-		make clean && CC=$c EXTRA_CFLAGS="-static" make $t/UnitTests -j`nproc`
+		printf "=========== Compiling $t (with $c compiler)\n\n\n" | tee -a artifacts/CIlog.log
+		make clean && CC=$c EXTRA_CFLAGS="-static" make $t/UnitTests -j`nproc`  2>&1 | tee -a artifacts/CIlog.log
 		if echo "$c" | grep -q "mingw"; then
 			cp ./bin/$t/UnitTests.exe artifacts/UnitTests_"$t"_"$c".exe
 			WINEOK="NOK"
@@ -136,85 +137,85 @@ for t in generic32 generic32lc generic64 generic64lc; do
 				fi
 			fi
 			if [ "$WINEOK" = "OK" ]; then
-				echo "\n\n\n=========== Testing $t (compiled with $c compiler) for i386 windows\n\n\n" | tee -a artifacts/CIlog.log
-				echo "============== (emulating with wine)" | tee -a artifacts/CIlog.log
-				wine ./bin/$t/UnitTests.exe -p
+				printf "\n\n\n=========== Testing $t (compiled with $c compiler) for i386 windows\n\n\n" | tee -a artifacts/CIlog.log
+				printf "============== (emulating with wine)" | tee -a artifacts/CIlog.log
+				wine ./bin/$t/UnitTests.exe -p | tee -a artifacts/CIlog.log
 			fi
 		else
 			if [ "$AVX512VL" != "" ] && [ "$AVX512F" != "" ]; then
 				# Since the -march=native / -mtune=native toggles are used, we cannot rely on Qemu on
 				# CPUs that support AVX512. Hence we execute the test natively
-				echo "\n\n\n=========== Testing $t (compiled with $c compiler) for i386 (native test as AVX512 is not supported yet by Qemu)\n\n\n" | tee -a artifacts/CIlog.log
-				./bin/$t/UnitTests -p
+				printf "\n\n\n=========== Testing $t (compiled with $c compiler) for i386 (native test as AVX512 is not supported yet by Qemu)\n\n\n" | tee -a artifacts/CIlog.log
+				./bin/$t/UnitTests -p | tee -a artifacts/CIlog.log
 			else
 				cp ./bin/$t/UnitTests artifacts/UnitTests_"$t"_"$c"
-				(echo "\n\n\n=========== Testing $t (compiled with $c compiler) for i386\n\n\n") | tee -a artifacts/CIlog.log
-				qemu-i386-static ./bin/$t/UnitTests -p
+				(printf "\n\n\n=========== Testing $t (compiled with $c compiler) for i386\n\n\n") | tee -a artifacts/CIlog.log
+				qemu-i386-static ./bin/$t/UnitTests -p | tee -a artifacts/CIlog.log
 			fi
 		fi
 	done
 done
 
-echo "\n\n\n=========== Switching to cross-compilation of C variants for ARM Cortex-A platforms\n\n\n" | tee -a artifacts/CIlog.log
+printf "\n\n\n=========== Switching to cross-compilation of C variants for ARM Cortex-A platforms\n\n\n" | tee -a artifacts/CIlog.log
 for t in generic32 generic32lc generic64 generic64lc; do
 	# ARM v6A
-	echo "\n\n\n=========== Compiling $t/UnitTests for ARM v6A\n\n\n" | tee -a artifacts/CIlog.log
-	make clean && CC="arm-linux-gnueabi-gcc" EXTRA_CFLAGS="-march=armv6 -mtune=arm1136j-s" EXTRA_ASMFLAGS=$EXTRA_CFLAGS EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc`
+	printf "\n\n\n=========== Compiling $t/UnitTests for ARM v6A\n\n\n" | tee -a artifacts/CIlog.log
+	make clean && CC="arm-linux-gnueabi-gcc" EXTRA_CFLAGS="-march=armv6 -mtune=arm1136j-s" EXTRA_ASMFLAGS=$EXTRA_CFLAGS EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc` 2>&1 | tee -a artifacts/CIlog.log
 	cp ./bin/$t/UnitTests artifacts/UnitTests_"$t"_"armv6"
 	# NOTE: there is a bus error with generic64(lc) for now, see issue #124 (https://github.com/XKCP/XKCP/issues/124)
 	# Hence, we deactivate the unit tests for this specific case.
 	if echo "$t" | grep -q "generic64"; then
 		true
 	else
-		echo "\n\n\n=========== Testing $t/UnitTests with Qemu for ARM v6A\n\n\n" | tee -a artifacts/CIlog.log
-		qemu-arm-static ./bin/$t/UnitTests -p
+		printf "\n\n\n=========== Testing $t/UnitTests with Qemu for ARM v6A\n\n\n" | tee -a artifacts/CIlog.log
+		qemu-arm-static ./bin/$t/UnitTests -p | tee -a artifacts/CIlog.log
 	fi
 	# ARM v7A
-	echo "\n\n\n=========== Compiling $t/UnitTests for ARM v7A\n\n\n" | tee -a artifacts/CIlog.log
-	make clean && CC="arm-linux-gnueabi-gcc" EXTRA_CFLAGS="-march=armv7-a -mtune=cortex-a15" EXTRA_ASMFLAGS=$EXTRA_CFLAGS EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc`
+	printf "\n\n\n=========== Compiling $t/UnitTests for ARM v7A\n\n\n" | tee -a artifacts/CIlog.log
+	make clean && CC="arm-linux-gnueabi-gcc" EXTRA_CFLAGS="-march=armv7-a -mtune=cortex-a15" EXTRA_ASMFLAGS=$EXTRA_CFLAGS EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc` 2>&1 | tee -a artifacts/CIlog.log
 	cp ./bin/$t/UnitTests artifacts/UnitTests_"$t"_"armv7a"
 	# NOTE: there is a bus error with generic64(lc) for now, see issue #124 (https://github.com/XKCP/XKCP/issues/124)
 	# Hence, we deactivate the unit tests for this specific case.
 	if echo "$t" | grep -q "generic64"; then
 		true
 	else
-		echo "\n\n\n=========== Testing $t/UnitTests with Qemu for ARM v7A\n\n\n" | tee -a artifacts/CIlog.log
-		qemu-arm-static ./bin/$t/UnitTests -p
+		printf "\n\n\n=========== Testing $t/UnitTests with Qemu for ARM v7A\n\n\n" | tee -a artifacts/CIlog.log
+		qemu-arm-static ./bin/$t/UnitTests -p | tee -a artifacts/CIlog.log
 	fi
 	# ARM 64
-	echo "\n\n\n=========== Compiling $t/UnitTests for ARM v8A (aarch64)\n\n\n" | tee -a artifacts/CIlog.log
-	make clean && CC="aarch64-linux-gnu-gcc" EXTRA_CFLAGS="-march=armv8.6-a -mtune=cortex-a75" EXTRA_ASMFLAGS=$EXTRA_CFLAGS EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc`
+	printf "\n\n\n=========== Compiling $t/UnitTests for ARM v8A (aarch64)\n\n\n" | tee -a artifacts/CIlog.log
+	make clean && CC="aarch64-linux-gnu-gcc" EXTRA_CFLAGS="-march=armv8.6-a -mtune=cortex-a75" EXTRA_ASMFLAGS=$EXTRA_CFLAGS EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc` 2>&1 | tee -a artifacts/CIlog.log
 	cp ./bin/$t/UnitTests artifacts/UnitTests_"$t"_"aarch64"
-	echo "\n\n\n=========== Testing $t/UnitTests with Qemu for  ARM v8A (aarch64)\n\n\n" | tee -a artifacts/CIlog.log
-	qemu-aarch64-static ./bin/$t/UnitTests -p
+	printf "\n\n\n=========== Testing $t/UnitTests with Qemu for  ARM v8A (aarch64)\n\n\n" | tee -a artifacts/CIlog.log
+	qemu-aarch64-static ./bin/$t/UnitTests -p | tee -a artifacts/CIlog.log
 done
 
-(echo "\n\n\n=========== Switching to cross-compilation of assembly optimized variants for ARM Cortex-A platforms\n\n\n") | tee -a artifacts/CIlog.log
+(printf "\n\n\n=========== Switching to cross-compilation of assembly optimized variants for ARM Cortex-A platforms\n\n\n") | tee -a artifacts/CIlog.log
 ### ARM A
 # ARM v6A
 t="ARMv6"
-echo "\n\n\n=========== Compiling $t/UnitTests\n\n\n" | tee -a artifacts/CIlog.log
-make clean && CC="arm-linux-gnueabi-gcc" EXTRA_CFLAGS="-march=armv6 -mtune=arm1136j-s" EXTRA_ASMFLAGS=$EXTRA_CFLAGS EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc`
+printf "\n\n\n=========== Compiling $t/UnitTests\n\n\n" | tee -a artifacts/CIlog.log
+make clean && CC="arm-linux-gnueabi-gcc" EXTRA_CFLAGS="-march=armv6 -mtune=arm1136j-s" EXTRA_ASMFLAGS=$EXTRA_CFLAGS EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc` 2>&1 | tee -a artifacts/CIlog.log
 cp ./bin/$t/UnitTests artifacts/UnitTests_"$t"_"armv6a"
-echo "\n\n\n=========== Testing $t/UnitTests with Qemu\n\n\n" | tee -a artifacts/CIlog.log
-qemu-arm-static ./bin/$t/UnitTests -p
+printf "\n\n\n=========== Testing $t/UnitTests with Qemu\n\n\n" | tee -a artifacts/CIlog.log
+qemu-arm-static ./bin/$t/UnitTests -p | tee -a artifacts/CIlog.log
 # ARM v7A
 t="ARMv7A"
-echo "\n\n\n=========== Compiling $t/UnitTests\n\n\n" | tee -a artifacts/CIlog.log
-make clean && CC="arm-linux-gnueabi-gcc" EXTRA_CFLAGS="-march=armv7-a -mtune=cortex-a15" EXTRA_ASMFLAGS=$EXTRA_CFLAGS EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc`
+printf "\n\n\n=========== Compiling $t/UnitTests\n\n\n" | tee -a artifacts/CIlog.log
+make clean && CC="arm-linux-gnueabi-gcc" EXTRA_CFLAGS="-march=armv7-a -mtune=cortex-a15" EXTRA_ASMFLAGS=$EXTRA_CFLAGS EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc` 2>&1 | tee -a artifacts/CIlog.log
 cp ./bin/$t/UnitTests artifacts/UnitTests_"$t"_"armv7a"
-echo "\n\n\n=========== Testing $t/UnitTests with Qemu\n\n\n" | tee -a artifacts/CIlog.log
-qemu-arm-static ./bin/$t/UnitTests -p
+printf "\n\n\n=========== Testing $t/UnitTests with Qemu\n\n\n" | tee -a artifacts/CIlog.log
+qemu-arm-static ./bin/$t/UnitTests -p | tee -a artifacts/CIlog.log
 # ARM v8A with aarch64
 t="ARMv8A"
-echo "\n\n\n=========== Compiling $t/UnitTests\n\n\n" | tee -a artifacts/CIlog.log
-make clean && CC="aarch64-linux-gnu-gcc" EXTRA_CFLAGS="-march=armv8.6-a -mtune=cortex-a75" EXTRA_ASMFLAGS=$EXTRA_CFLAGS EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc`
+printf "\n\n\n=========== Compiling $t/UnitTests\n\n\n" | tee -a artifacts/CIlog.log
+make clean && CC="aarch64-linux-gnu-gcc" EXTRA_CFLAGS="-march=armv8.6-a -mtune=cortex-a75" EXTRA_ASMFLAGS=$EXTRA_CFLAGS EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc` 2>&1 | tee -a artifacts/CIlog.log
 cp ./bin/$t/UnitTests artifacts/UnitTests_"$t"_"aarch64"
-echo "\n\n\n=========== Testing $t/UnitTests with Qemu\n\n\n" | tee -a artifacts/CIlog.log
-qemu-aarch64-static ./bin/$t/UnitTests -p
+printf "\n\n\n=========== Testing $t/UnitTests with Qemu\n\n\n" | tee -a artifacts/CIlog.log
+qemu-aarch64-static ./bin/$t/UnitTests -p | tee -a artifacts/CIlog.log
 
 
-echo "\n\n\n=========== Switching to cross-compilation of C and assembly optimized variants for ARM Cortex-M platforms\n\n\n" | tee -a artifacts/CIlog.log
+printf "\n\n\n=========== Switching to cross-compilation of C and assembly optimized variants for ARM Cortex-M platforms\n\n\n" | tee -a artifacts/CIlog.log
 ### ARM M dedicated compilations: they need special care as we test them with semi-hosting qemu-system
 ## NOTE: we use some trick to force Qemu in semi-hosting mode to exit, as well as patch the call to "process" with the appropriate arguments
 ## as args are note taken by qemu-system
@@ -231,20 +232,22 @@ for t in ARMv6M ARMv7M; do
 	if echo "$t" | grep -q "ARMv7M"; then
 		true
 	else
-		echo "\n\n\n=========== Compiling $t/UnitTests for ARMv6M microcontrollers\n\n\n" | tee -a artifacts/CIlog.log
-		make clean && CC="arm-none-eabi-gcc" EXTRA_CFLAGS="-march=armv6-m -mtune=cortex-m0 -specs=picolibc.specs --oslib=semihost -TCI/cortexm_layout.ld" EXTRA_ASMFLAGS=$EXTRA_CFLAGS EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc`
+		printf "\n\n\n=========== Compiling $t/UnitTests for ARMv6M microcontrollers\n\n\n" | tee -a artifacts/CIlog.log
+		make clean && CC="arm-none-eabi-gcc" EXTRA_CFLAGS="-march=armv6-m -mtune=cortex-m0 -specs=picolibc.specs --oslib=semihost -TCI/cortexm_layout.ld" EXTRA_ASMFLAGS=$EXTRA_CFLAGS EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc` 2>&1 | tee -a artifacts/CIlog.log
 		cp ./bin/$t/UnitTests artifacts/UnitTests_"$t"_"armv6m"
-		echo "\n\n\n=========== Testing $t/UnitTests with Qemu-system semi-hosting\n\n\n" | tee -a artifacts/CIlog.log
-		qemu-system-arm -semihosting-config enable=on -monitor none -serial none -nographic -machine mps2-an385,accel=tcg -no-reboot -kernel ./bin/$t/UnitTests
+		printf "\n\n\n=========== Testing $t/UnitTests with Qemu-system semi-hosting\n\n\n" | tee -a artifacts/CIlog.log
+		qemu-system-arm -semihosting-config enable=on -monitor none -serial none -nographic -machine mps2-an385,accel=tcg -no-reboot -kernel ./bin/$t/UnitTests | tee -a artifacts/CIlog.log
 	fi
 	##
 	if echo "$t" | grep -q "ARMv6M"; then
 		true
 	else
-		echo "\n\n\n=========== Compiling $t/UnitTests for ARMv7M microcontrollers\n\n\n" | tee -a artifacts/CIlog.log
-		make clean && CC="arm-none-eabi-gcc" EXTRA_CFLAGS="-march=armv7-m -mtune=cortex-m3 -specs=picolibc.specs --oslib=semihost -TCI/cortexm_layout.ld" EXTRA_ASMFLAGS=$EXTRA_CFLAGS EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc`
+		printf "\n\n\n=========== Compiling $t/UnitTests for ARMv7M microcontrollers\n\n\n" | tee -a artifacts/CIlog.log
+		make clean && CC="arm-none-eabi-gcc" EXTRA_CFLAGS="-march=armv7-m -mtune=cortex-m3 -specs=picolibc.specs --oslib=semihost -TCI/cortexm_layout.ld" EXTRA_ASMFLAGS=$EXTRA_CFLAGS EXTRA_LDFLAGS="-static" make $t/UnitTests -j`nproc` 2>&1 | tee -a artifacts/CIlog.log
 		cp ./bin/$t/UnitTests artifacts/UnitTests_"$t"_"armv7m"
-		echo "\n\n\n=========== Testing $t/UnitTests with Qemu-system semi-hosting\n\n\n" | tee -a artifacts/CIlog.log
-		qemu-system-arm -semihosting-config enable=on -monitor none -serial none -nographic -machine mps2-an385,accel=tcg -no-reboot -kernel ./bin/$t/UnitTests
+		printf "\n\n\n=========== Testing $t/UnitTests with Qemu-system semi-hosting\n\n\n" | tee -a artifacts/CIlog.log
+		qemu-system-arm -semihosting-config enable=on -monitor none -serial none -nographic -machine mps2-an385,accel=tcg -no-reboot -kernel ./bin/$t/UnitTests | tee -a artifacts/CIlog.log
 	fi
 done
+
+printf "\n+++ Done! +++\n" | tee -a artifacts/CIlog.log

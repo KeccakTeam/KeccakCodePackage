@@ -31,6 +31,9 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #include "testXoofff.h"
 #include "testXoofffModes.h"
 #include "testXoodyak.h"
+#ifdef XKCP_has_x86_64_CPU_detection
+#include "x86-64-dispatch.h"
+#endif
 
 #ifdef KeccakReference
 #include "displayIntermediateValues.h"
@@ -407,6 +410,11 @@ void printHelp()
 #ifdef KeccakReference
         printf("  --examples or -e          Generation of example files\n");
 #endif
+#ifdef XKCP_has_x86_64_CPU_detection
+        printf("  --disableSSSE3            Disable use of SSSE3 implementations\n");
+        printf("  --disableAVX2             Disable use of AVX2 implementations\n");
+        printf("  --disableAVX512           Disable use of AVX512 implementations\n");
+#endif
 }
 
 int process(int argc, char* argv[])
@@ -432,6 +440,9 @@ int process(int argc, char* argv[])
     for(i=1; i<argc; i++) {
         if ((strcmp("--help", argv[i]) == 0) || (strcmp("-h", argv[i]) == 0))
             help = 1;
+#ifdef XKCP_has_x86_64_CPU_detection
+        else if (XKCP_ProcessCpuFeatureCommandLineOption(argv[i])) {}
+#endif
         else if ((strcmp("--all", argv[i]) == 0) || (strcmp("-a", argv[i]) == 0))
             SnP = KeccakSponge = KeccakDuplex = KeccakShakingUpAE = KeccakPRG = FIPS202 = KangarooTwelve = Kravatte = SP800_185 = examples = Xoofff = Xoodyak = 1;
         else if ((strcmp("--SnP", argv[i]) == 0) || (strcmp("-p", argv[i]) == 0))
@@ -563,5 +574,8 @@ int process(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
+#ifdef XKCP_has_x86_64_CPU_detection
+    XKCP_EnableAllCpuFeatures();
+#endif
     return process(argc, argv);
 }

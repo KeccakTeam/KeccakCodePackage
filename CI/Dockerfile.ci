@@ -72,7 +72,7 @@ COPY ./CI/ci_tests.sh ./
 # the execution of the script
 ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
 
-RUN sh ci_tests.sh; echo $? > artifacts/status; tar -czvf artifacts.tar.gz artifacts/
+RUN bash ci_tests.sh; echo $? > artifacts/status; tar -czvf artifacts.tar.gz artifacts/
 
 # Prepare our binary
 ARG FAILURE_ARTIFACTS

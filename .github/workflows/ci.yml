@@ -45,3 +45,31 @@ jobs:
 
       - name: Run Unit Tests
         run: bin/generic64/UnitTests -a
+
+  all_x86-64_implementation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v3
+
+      - name: Initialize submodules
+        run: git submodule update --init --recursive
+
+      - name: Install dependencies
+        run: sudo apt-get install -y xsltproc
+
+      - name: Build x86-64 Unit Tests
+        run: make x86-64/UnitTests
+
+      - name: Run x86-64 Unit Tests
+        run: bin/x86-64/UnitTests -a
+
+      - name: Run x86-64 Unit Tests with AVX512 disabled
+        run: bin/x86-64/UnitTests -a --disableAVX512
+
+      - name: Run x86-64 Unit Tests with AVX2 disabled
+        run: bin/x86-64/UnitTests -a --disableAVX512 --disableAVX2
+
+      - name: Run x86-64 Unit Tests with SSSE3 disabled
+        run: bin/x86-64/UnitTests -a --disableAVX512 --disableAVX2 --disableSSSE3

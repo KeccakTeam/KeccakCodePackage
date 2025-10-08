@@ -19,6 +19,9 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #include "config.h"
 #include "testPerformance.h"
 #include "testXooPerformance.h"
+#ifdef XKCP_has_x86_64_CPU_detection
+#include "x86-64-dispatch.h"
+#endif
 
 #define MEASURE_PERF
 
@@ -198,6 +201,11 @@ void printHelp()
         printf("  --all or -a               All benchmarsk\n");
         printf("  --Keccak                  Benchmark of all Keccak-p-based functions\n");
         printf("  --Xoodoo                  Benchmark of all Xoodoo-based functions\n");
+#ifdef XKCP_has_x86_64_CPU_detection
+        printf("  --disableSSSE3            Disable use of SSSE3 implementations\n");
+        printf("  --disableAVX2             Disable use of AVX2 implementations\n");
+        printf("  --disableAVX512           Disable use of AVX512 implementations\n");
+#endif
 }
 
 int process(int argc, char* argv[])
@@ -213,6 +221,9 @@ int process(int argc, char* argv[])
     for(i=1; i<argc; i++) {
         if ((strcmp("--help", argv[i]) == 0) || (strcmp("-h", argv[i]) == 0))
             help = 1;
+#ifdef XKCP_has_x86_64_CPU_detection
+        else if (XKCP_ProcessCpuFeatureCommandLineOption(argv[i])) {}
+#endif
         else if ((strcmp("--all", argv[i]) == 0) || (strcmp("-a", argv[i]) == 0))
             K = X = 1;
         else if ((strcmp("--Keccak", argv[i]) == 0) || (strcmp("-c", argv[i]) == 0))
@@ -239,5 +250,8 @@ int process(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
+#ifdef XKCP_has_x86_64_CPU_detection
+    XKCP_EnableAllCpuFeatures();
+#endif
     return process(argc, argv);
 }

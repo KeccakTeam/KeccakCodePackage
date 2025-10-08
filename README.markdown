@@ -33,7 +33,7 @@ Then, to build **libXKCP**, the quick answer is to launch:
 make <target>/libXKCP.so
 ```
 
-where `<target>` is to be replaced with the actual target (e.g., `ARMv6M` or `AVX512`), and where `.so` can be replaced with `.a` for a static library or with `.dylib` for a dynamic library on macOS.
+where `<target>` is to be replaced with the actual target (e.g., `x86-64` or `ARMv6M`), and where `.so` can be replaced with `.a` for a static library or with `.dylib` for a dynamic library on macOS.
 More details, and in particular the list of targets, can be found in the section on how to build the XKCP below.
 
 If your compiler supports it, you may add `EXTRA_CFLAGS="-march=native -mtune=native"` at the end of the command line so that the code is further optimized for the platform on which it is compiled.
@@ -135,13 +135,17 @@ make generic64/UnitTests
 or
 
 ```
-make AVX512/Benchmarks
+make x86-64/Benchmarks
 ```
 
-to build UnitTests using plain 64-bit code or to build the Benchmarks tool with AVX-512 code. The name before the slash indicates the target, i.e., the platform or instruction set used, while the part after the slash is the executable or library to build. As another example, the static (resp. dynamic) library is built by typing `make ARMv7M/libXKCP.a` (resp. `.so`) or similarly with `ARMv7M` replaced with the appropriate platform or instruction set name.  An alternate C compiler can be specified via the `CC` environment variable.
+to build UnitTests using plain 64-bit code or to build the Benchmarks tool with x86-64 code.
+The name before the slash indicates the target, i.e., the platform or instruction set used, while the part after the slash is the executable or library to build.
+As another example, the static (resp. dynamic) library is built by typing `make ARMv7M/libXKCP.a` (resp. `.so`) or similarly with `ARMv7M` replaced with the appropriate platform or instruction set name.
+An alternate C compiler can be specified via the `CC` environment variable.
 
 At the time of this writing, the possible target names before the slash are:
 
+* `x86-64`: automatic runtime selection among 64-bit plain C and SSSE3, AVX2 and AVX-512 instruction sets (**recommended for x86-64 platforms**);
 * `compact`: plain C compact implementations;
 * `generic32`: plain C implementation, generically optimized for 32-bit platforms;
 * `generic32lc`: same as `generic32` but featuring the lane complementing technique for platforms without a "and not" instruction;
@@ -164,7 +168,7 @@ If your compiler supports it, you may add `EXTRA_CFLAGS="-march=native -mtune=na
 Instead of building an executable with *GCC*, one can choose to select the files needed and make a package. For this, simply append `.pack` to the target name, e.g.,
 
 ```
-make generic64/UnitTests.pack
+make x86-64/UnitTests.pack
 ```
 
 This creates a `.tar.gz` archive with all the necessary files to build the given target.
@@ -270,6 +274,7 @@ We wish to thank all the contributors, and in particular:
 - Kent Ross for various improvements in [XKCP/K12](https://github.com/XKCP/K12) imported here
 - Larry Bassham, NIST for the original `genKAT.c` developed during the SHA-3 contest
 - Ryad Benadjila for adding continuous integration on different platforms with qemu
+- Samuel Neves and Jack O'Connor for their processor capability detection code
 - Stéphane Léon for helping support macOS
 - And to all those who fixed bugs or brought improvements (in no specific order): Tyler Young, Robert J Spencer, amane-c, Øystein Heskestad, Norman (Hongyu) Xu, Jorrit Jongma, David Adrian, Sebastian Ramacher, lvd2, Sam Chen, Thom Wiggers, Thomas van der Burgt, Donald Tsang, MoorayJenkins, UnePierre, Diggory Hardy, Joost Rijneveld, Steve Thomas, Benoît Viguier, Ko Stoffelen, Bogdan Vaneev, Alf Watt, surrim, Robert Crossfield, David Leon Gil, Matt Kelly, Ross Biro
 

@@ -27,6 +27,9 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #ifdef XKCP_has_TurboSHAKE
 #include "TurboSHAKE.h"
 #endif
+#ifdef XKCP_has_x86_64_CPU_detection
+#include "x86-64-dispatch.h"
+#endif
 
 int hexencode(const void* data_buf, size_t dataLength, char* result, size_t resultSize)
 {
@@ -362,6 +365,12 @@ void printHelp()
     printf("  --ethereum                  Equivalent to --sha3-256 --no-suffix\n");
 #endif
     printf("\n");
+#ifdef XKCP_has_x86_64_CPU_detection
+    printf("  --disableSSSE3              Disable use of SSSE3 implementations\n");
+    printf("  --disableAVX2               Disable use of AVX2 implementations\n");
+    printf("  --disableAVX512             Disable use of AVX512 implementations\n");
+    printf("\n");
+#endif
     printf("The options are processed in order.\n");
 #if defined(XKCP_has_Sponge_Keccak)
     printf("By default, it uses SHAKE128 and base64 display.\n");
@@ -551,6 +560,9 @@ int process(int argc, char* argv[])
             printHelp();
             return 0;
         }
+#ifdef XKCP_has_x86_64_CPU_detection
+        else if (XKCP_ProcessCpuFeatureCommandLineOption(argv[i])) {}
+#endif
         else {
             if (strlen(argv[i]) > 2) {
                 if ((argv[i][0] == '-') && (argv[i][1] == '-')) {
@@ -574,5 +586,8 @@ int process(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
+#ifdef XKCP_has_x86_64_CPU_detection
+    XKCP_EnableAllCpuFeatures();
+#endif
     return process(argc, argv);
 }
